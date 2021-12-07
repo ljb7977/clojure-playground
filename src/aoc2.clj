@@ -41,11 +41,19 @@
         (= first-a first-b) (recur distance rest-a rest-b)
         :else (recur (inc distance) rest-a rest-b))))
 
-(defn find-correct-boxes [boxes]
-  (let [[a b] (first boxes)]
-    (if (= 1 (get-hamming-distance a b))
-      [a b]
-      (recur (rest boxes)))))
+;(defn find-correct-boxes [boxes]
+;  (let [[a b] (first boxes)]
+;    (if (= 1 (get-hamming-distance a b))
+;      [a b]
+;      (recur (rest boxes)))))
+
+(defn hamming-distance-1? [[a b]]
+  (= 1 (get-hamming-distance a b)))
+
+(defn find-correct-box-pair [box-pairs]
+  (->> box-pairs
+       (filter hamming-distance-1?)
+       first))
 
 (defn get-common-letters [[a b]]
   (loop [commons "", [first-a & rest-a] a, [first-b & rest-b] b]
@@ -57,5 +65,5 @@
 (comment
   (->> input-val
        get-permutation
-       find-correct-boxes
+       find-correct-box-pair
        get-common-letters))
