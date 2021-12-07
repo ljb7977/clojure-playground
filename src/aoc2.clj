@@ -30,3 +30,32 @@
      (apply map +)
      multiply)
 ; ------- Part 2 -------
+(defn get-permutation [input]
+  (for [a input, b input] [a b]))
+
+(defn get-hamming-distance [a b]
+  (loop [distance 0, a a, b b]
+    (let [_a (first a), _b (first b)]
+      (cond
+        (or (nil? _a) (nil? _b)) distance
+        (= _a _b) (recur distance (rest a) (rest b))
+        :else (recur (inc distance) (rest a) (rest b))))))
+
+(defn find-correct-boxes [boxes]
+  (let [[a b] (first boxes)]
+    (if (= 1 (get-hamming-distance a b))
+      [a b]
+      (recur (rest boxes)))))
+
+(defn get-common-letters [a b]
+  (loop [commons "", a a, b b]
+    (let [_a (first a), _b (first b)]
+      (cond
+        (or (nil? _a) (nil? _b)) commons
+        (= _a _b) (recur (str commons _a) (rest a) (rest b))
+        :else (recur commons (rest a) (rest b))))))
+
+(->> input-val
+     get-permutation
+     find-correct-boxes
+     (apply get-common-letters))
