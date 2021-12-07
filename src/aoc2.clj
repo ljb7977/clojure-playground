@@ -47,7 +47,7 @@
       [a b]
       (recur (rest boxes)))))
 
-(defn get-common-letters [a b]
+(defn get-common-letters [[a b]]
   (loop [commons "", a a, b b]
     (let [_a (first a), _b (first b)]
       (cond
@@ -58,4 +58,4 @@
 (->> input-val
      get-permutation
      find-correct-boxes
-     (apply get-common-letters))
+     get-common-letters)
