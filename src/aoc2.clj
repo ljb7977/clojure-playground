@@ -13,27 +13,27 @@
 (defn exists-any-letter-appears-n-times? [m times]
   (if (contains? (set (vals m)) times) 1 0))
 
-(defn exists-any-letter-appears-twice? [m]
+(defn exists-any-letter-appears-2x? [m]
   (exists-any-letter-appears-n-times? m 2))
 
-(defn exists-any-letter-appears-three-times? [m]
+(defn exists-any-letter-appears-3x? [m]
   (exists-any-letter-appears-n-times? m 3))
 
-(->> "ubkfmdjxyzlbgkrotcepvswaqx"
-     count-chars
-     exists-any-letter-appears-twice?)
-
 (defn sum-each [pairs]
-  (loop [sum-a 0 sum-b 0 pairs pairs]
+  (loop [sum-a 0, sum-b 0, pairs pairs]
     (let [[a b] (first pairs)]
       (if (empty? pairs)
         [sum-a sum-b]
         (recur (+ sum-a a) (+ sum-b b) (rest pairs))))))
 
-(let [[two three] (->> input-val
-                       (map count-chars)
-                       (map (juxt
-                              exists-any-letter-appears-twice?
-                              exists-any-letter-appears-three-times?))
-                       sum-each)]
-  (* two three))
+(defn multiply [[a b]]
+  (* a b))
+
+(->> input-val
+     (map count-chars)
+     (map (juxt
+            exists-any-letter-appears-2x?
+            exists-any-letter-appears-3x?))
+     sum-each
+     multiply)
+; ------- Part 2 -------
