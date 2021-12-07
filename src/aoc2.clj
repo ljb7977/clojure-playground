@@ -19,13 +19,6 @@
 (defn exists-any-letter-appears-3x? [m]
   (exists-any-letter-appears-n-times? m 3))
 
-(defn sum-each [pairs]
-  (loop [sum-a 0, sum-b 0, pairs pairs]
-    (let [[a b] (first pairs)]
-      (if (empty? pairs)
-        [sum-a sum-b]
-        (recur (+ sum-a a) (+ sum-b b) (rest pairs))))))
-
 (defn multiply [[a b]]
   (* a b))
 
@@ -34,6 +27,6 @@
      (map (juxt
             exists-any-letter-appears-2x?
             exists-any-letter-appears-3x?))
-     sum-each
+     (apply map +)
      multiply)
 ; ------- Part 2 -------
