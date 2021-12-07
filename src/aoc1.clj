@@ -12,12 +12,12 @@
 (reduce + input-seq)
 
 ; -------- Part 2 ----------
-(defn iter [history now seq]
-  (let [adder (first seq)
-        now (+ now adder)]
-    (if (contains? history now)
-      now
-      (recur (conj history now) now (rest seq)))))
+(defn iter [history sum seq]
+  (let [addend (first seq)
+        sum (+ sum addend)]
+    (if (contains? history sum)
+      sum
+      (recur (conj history sum) sum (rest seq)))))
 
 (->> input-seq
      cycle
