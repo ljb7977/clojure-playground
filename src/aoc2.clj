@@ -1,7 +1,7 @@
 (ns aoc2
   (:require util))
 
-(def input-val (util/read-input "aoc2.txt"))
+(def input-val (util/read-lines "aoc2.txt"))
 
 (defn count-chars [str]
   (loop [str str, counted {}]
