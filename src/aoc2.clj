@@ -19,16 +19,13 @@
 (defn exists-any-letter-appears-3x? [m]
   (exists-any-letter-appears-n-times? m 3))
 
-(defn multiply [[a b]]
-  (* a b))
-
 (->> input-val
      (map count-chars)
      (map (juxt
             exists-any-letter-appears-2x?
             exists-any-letter-appears-3x?))
      (apply map +)
-     multiply)
+     (apply *))
 ; ------- Part 2 -------
 (defn get-permutation [xs]
   (for [a xs, b xs] [a b]))
