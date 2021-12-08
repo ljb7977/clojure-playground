@@ -46,12 +46,24 @@
        input-list->map
        draw))
 
+;------- Part 1 -------
 (comment
   (->> input-val
        (map process-one-step)
        (reduce #(merge-with into %1 %2) {})
        vals
-       (filter (fn [f] (> (count f) 1)))
+       (filter #(> (count %) 1))
        count))
-
 ;------- Part 1 끝 -------
+
+;------- Part 2 -------
+(comment
+  (let [num-lines (count input-val)]
+    (->> input-val
+         (map process-one-step)
+         (reduce #(merge-with into %1 %2) {})
+         vals
+         (filter #(> (count %) 1))
+         (reduce (fn [acc val]
+                   (apply disj acc val)) (set (range 1 (inc num-lines))))
+         first)))
