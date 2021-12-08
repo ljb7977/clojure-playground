@@ -1,2 +1,4 @@
 {:deps {}
- :paths ["src" "resources"]}
+ :paths ["src"
+         "y2018/src" "y2018/resources"
+         "y2021/src" "y2021/resources"]}

@@ -59,7 +59,6 @@
        vals
        (filter #(> (count %) 1))
        count))
-;------- Part 1 끝 -------
 
 ;------- Part 2 -------
 (comment

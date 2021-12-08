@@ -7,9 +7,12 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/y2018/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/y2018/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/y2021/resources" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/y2021/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
