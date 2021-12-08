@@ -4,18 +4,6 @@
 (def input-val (util/read-lines "aoc2.txt"))
 
 ; ------- Part 1 -------
-(defn count-chars
-  "문자열을 하나 받아서, 각 문자의 갯수를 세어 map으로 반환합니다.
-  Example)
-  Input: abcdee
-  Output: {a 1 b 1 c 1 d 1 e 2}
-  "
-  [f]
-  (reduce (fn [counted f1]
-            (assoc counted f1 (inc (get counted f1 0))))
-          {}
-          f))
-
 (defn exists-any-letter-appears-n-times?
   "문자 출현 빈도 맵을 받아서, n번 나타나는 문자가 있는지 여부를 정수(1/0)로 반환합니다.
   Input: {a 1 b 2 c 3}, 3
@@ -31,7 +19,7 @@
 
 (comment
   (->> input-val
-       (map count-chars)
+       (map frequencies)
        (map (juxt
               exists-any-letter-appears-2x?
               exists-any-letter-appears-3x?))
@@ -60,17 +48,6 @@
 (defn hamming-distance-1? [[a b]]
   (= 1 (get-hamming-distance a b)))
 
-; 이거 함수로 묶지 말고 펼치는게 나을수도?
-(defn find-correct-box-pair
-  "string pair의 리스트를 받아서, 그중에 hamming distance가 1인 pair를 반환합니다.
-  Input: [[aa ab] [ac de]]
-  Output [aa ab]
-  "
-  [box-pairs]
-  (->> box-pairs
-       (filter hamming-distance-1?)
-       first))
-
 (defn get-common-letters [f g]
   (reduce (fn [commons, [f1 g1]]
             (if (= f1 g1) (str commons f1) commons))
@@ -80,5 +57,6 @@
 (comment
   (->> input-val
        get-permutation
-       find-correct-box-pair
+       (filter hamming-distance-1?)
+       first
        (apply get-common-letters)))
