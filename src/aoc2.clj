@@ -17,7 +17,9 @@
           f))
 
 (defn exists-any-letter-appears-n-times?
-  "문자 출현 빈도 맵을 받아서, n번 나타나는 문자가 있는지 여부를 반환합니다."
+  "문자 출현 빈도 맵을 받아서, n번 나타나는 문자가 있는지 여부를 정수(1/0)로 반환합니다.
+  Input: {a 1 b 2 c 3}, 3
+  Output: 1"
   [m times]
   (if (contains? (set (vals m)) times) 1 0))
 
@@ -37,7 +39,12 @@
        (apply *)))
 
 ; ------- Part 2 -------
-(defn get-permutation [xs]
+(defn get-permutation
+  "배열의 제곱을 반환합니다.
+  Input: [a b c]
+  Output: [[a a] [a b] [a c] [b a] [b b] [b c] [c a] [c b] [c c]]
+  "
+  [xs]
   (for [a xs, b xs] [a b]))
 
 (defn get-hamming-distance [f g]
@@ -54,7 +61,12 @@
   (= 1 (get-hamming-distance a b)))
 
 ; 이거 함수로 묶지 말고 펼치는게 나을수도?
-(defn find-correct-box-pair [box-pairs]
+(defn find-correct-box-pair
+  "string pair의 리스트를 받아서, 그중에 hamming distance가 1인 pair를 반환합니다.
+  Input: [[aa ab] [ac de]]
+  Output [aa ab]
+  "
+  [box-pairs]
   (->> box-pairs
        (filter hamming-distance-1?)
        first))
