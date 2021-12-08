@@ -1,7 +1,7 @@
-(ns aoc2
+(ns day2
   (:require util))
 
-(def input-val (util/read-lines "aoc2.txt"))
+(def input-val (util/read-lines "day2.txt"))
 
 ; ------- Part 1 -------
 (defn exists-any-letter-appears-n-times?

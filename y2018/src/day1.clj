@@ -1,7 +1,7 @@
-(ns aoc1
+(ns day1
   (:require [util]))
 
-(def input-val (util/read-lines "aoc1.txt"))
+(def input-val (util/read-lines "day1.txt"))
 
 
 ; -------- Part 1 ----------

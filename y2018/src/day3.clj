@@ -1,7 +1,7 @@
-(ns aoc3
+(ns day3
   (:require util))
 
-(def input-val (util/read-lines "aoc3.txt"))
+(def input-val (util/read-lines "day3.txt"))
 (def pattern #"#(\d+) @ (\d+).(\d+): (\d+)x(\d+)")
 (def example-line "#1247 @ 439,612: 25x27")
 
