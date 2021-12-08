@@ -8,14 +8,14 @@
   "문자 출현 빈도 맵을 받아서, n번 나타나는 문자가 있는지 여부를 정수(1/0)로 반환합니다.
   Input: {a 1 b 2 c 3}, 3
   Output: 1"
-  [m times]
+  [times m]
   (if (contains? (set (vals m)) times) 1 0))
 
-(defn exists-any-letter-appears-2x? [m]
-  (exists-any-letter-appears-n-times? m 2))
+(def exists-any-letter-appears-2x?
+  (partial exists-any-letter-appears-n-times? 2))
 
-(defn exists-any-letter-appears-3x? [m]
-  (exists-any-letter-appears-n-times? m 3))
+(def exists-any-letter-appears-3x?
+  (partial exists-any-letter-appears-n-times? 3))
 
 (comment
   (->> input-val
