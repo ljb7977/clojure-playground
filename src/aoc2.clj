@@ -3,12 +3,12 @@
 
 (def input-val (util/read-lines "aoc2.txt"))
 
-(defn count-chars [str]
-  (loop [str str, counted {}]
-    (let [ch (first str)]
-      (if (empty? str)
-        counted
-        (recur (rest str) (assoc counted ch (inc (get counted ch 0))))))))
+; ------- Part 1 -------
+(defn count-chars [f]
+  (reduce (fn [counted f1]
+            (assoc counted f1 (inc (get counted f1 0))))
+          {}
+          f))
 
 (defn exists-any-letter-appears-n-times? [m times]
   (if (contains? (set (vals m)) times) 1 0))
@@ -19,48 +19,46 @@
 (defn exists-any-letter-appears-3x? [m]
   (exists-any-letter-appears-n-times? m 3))
 
-(->> input-val
-     (map count-chars)
-     (map (juxt
-            exists-any-letter-appears-2x?
-            exists-any-letter-appears-3x?))
-     (apply map +)
-     (apply *))
+(comment
+  (->> input-val
+       (map count-chars)
+       (map (juxt
+              exists-any-letter-appears-2x?
+              exists-any-letter-appears-3x?))
+       (apply map +)
+       (apply *)))
+
 ; ------- Part 2 -------
 (defn get-permutation [xs]
   (for [a xs, b xs] [a b]))
 
-(defn get-hamming-distance [a b]
-  "Example: asdf, asff -> 1"
-  (loop [distance 0, [first-a & rest-a] a, [first-b & rest-b] b]
-      (cond
-        (or (nil? first-a) (nil? first-b)) distance
-        (= first-a first-b) (recur distance rest-a rest-b)
-        :else (recur (inc distance) rest-a rest-b))))
-
-;(defn find-correct-boxes [boxes]
-;  (let [[a b] (first boxes)]
-;    (if (= 1 (get-hamming-distance a b))
-;      [a b]
-;      (recur (rest boxes)))))
+(defn get-hamming-distance [f g]
+  "두 string f, g간의 해밍 거리를 구합니다.
+  Example: asdf, asff -> 1
+           abcde, abdcb -> 2
+  "
+  (reduce (fn [distance, [f1 g1]]
+            (if (= f1 g1) distance (inc distance)))
+          0
+          (map vector f g)))
 
 (defn hamming-distance-1? [[a b]]
   (= 1 (get-hamming-distance a b)))
 
+; 이거 함수로 묶지 말고 펼치는게 나을수도?
 (defn find-correct-box-pair [box-pairs]
   (->> box-pairs
        (filter hamming-distance-1?)
        first))
 
-(defn get-common-letters [[a b]]
-  (loop [commons "", [first-a & rest-a] a, [first-b & rest-b] b]
-      (cond
-        (or (nil? first-a) (nil? first-b)) commons
-        (= first-a first-b) (recur (str commons first-a) rest-a rest-b)
-        :else (recur commons rest-a rest-b))))
+(defn get-common-letters [f g]
+  (reduce (fn [commons, [f1 g1]]
+            (if (= f1 g1) (str commons f1) commons))
+          ""
+          (map vector f g)))
 
 (comment
   (->> input-val
        get-permutation
        find-correct-box-pair
-       get-common-letters))
+       (apply get-common-letters)))
