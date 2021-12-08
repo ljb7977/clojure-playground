@@ -1,4 +1,4 @@
-(ns day3
+(ns y2018.day3
   (:require util))
 
 (def input-val (util/read-lines "day3.txt"))
