@@ -3,12 +3,10 @@
 
 (def input-val (util/read-lines "aoc1.txt"))
 
-(defn parse-int [string]
-  (Integer/parseInt string))
 
 ; -------- Part 1 ----------
 (->> input-val
-     (map parse-int)
+     (map util/parse-int)
      (reduce +))
 
 ; -------- Part 2 ----------
@@ -23,7 +21,7 @@
 
 (comment
   (->> input-val
-       (map parse-int)
+       (map util/parse-int)
        cycle
        iter))
 
@@ -39,7 +37,7 @@
 
 (comment
   (->> input-val
-       (map parse-int)
+       (map util/parse-int)
        cycle
        (reductions +)
        iter2))

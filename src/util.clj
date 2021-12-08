@@ -6,3 +6,6 @@
        io/resource
        io/reader
        line-seq))
+
+(defn parse-int [string]
+  (Integer/parseInt string))
