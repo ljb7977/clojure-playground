@@ -4,13 +4,21 @@
 (def input-val (util/read-lines "aoc2.txt"))
 
 ; ------- Part 1 -------
-(defn count-chars [f]
+(defn count-chars
+  "문자열을 하나 받아서, 각 문자의 갯수를 세어 map으로 반환합니다.
+  Example)
+  Input: abcdee
+  Output: {a 1 b 1 c 1 d 1 e 2}
+  "
+  [f]
   (reduce (fn [counted f1]
             (assoc counted f1 (inc (get counted f1 0))))
           {}
           f))
 
-(defn exists-any-letter-appears-n-times? [m times]
+(defn exists-any-letter-appears-n-times?
+  "문자 출현 빈도 맵을 받아서, n번 나타나는 문자가 있는지 여부를 반환합니다."
+  [m times]
   (if (contains? (set (vals m)) times) 1 0))
 
 (defn exists-any-letter-appears-2x? [m]
