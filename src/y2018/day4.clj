@@ -80,3 +80,5 @@
        (apply max-key #(max-val-of-map (second %)))
        ((fn [[id minute-map]]
           (* id (first (apply max-key second (seq minute-map))))))))
+
+
