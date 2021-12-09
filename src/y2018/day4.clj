@@ -13,7 +13,7 @@
    :hour     (Integer/parseInt hour)
    :minute   (Integer/parseInt minute)
    :action   action
-   :guard-id guard-id})
+   :guard-id (if (nil? guard-id) nil (Integer/parseInt guard-id))})
 
 (defn parse [f]
   (->> f
@@ -49,15 +49,34 @@
                                end :end-minute}]
   (update result guard-id concat (range start end)))
 
-(->> input-val
-     sort
-     (map parse)
-     (reduce records->sleeping-ranges {:result [] :curr {}})
-     :result
-     (reduce collect-minutes {})
-     (apply max-key #(count (second %)))
-     ((fn [[id minutes]]
-       (* (Integer/parseInt id) (->> minutes
-                                    frequencies
-                                    (apply max-key #(second %))
-                                    first)))))
+(defn get-frequencies [[id xs]]
+  [id (frequencies xs)])
+
+(defn max-val-of-map [m]
+  (apply max (vals m)))
+
+(comment
+  ; ----- Part 1
+  (->> input-val
+       sort
+       (map parse)
+       (reduce records->sleeping-ranges {:result [] :curr {}})
+       :result
+       (reduce collect-minutes {})
+       (apply max-key #(count (second %)))
+       ((fn [[id minutes]]
+         (* id (->> minutes
+                   frequencies
+                   (apply max-key #(second %))
+                   first)))))
+  ; ----- Part 2
+  (->> input-val
+       sort
+       (map parse)
+       (reduce records->sleeping-ranges {:result [] :curr {}})
+       :result
+       (reduce collect-minutes {})
+       (map get-frequencies)
+       (apply max-key #(max-val-of-map (second %)))
+       ((fn [[id minute-map]]
+          (* id (first (apply max-key second (seq minute-map))))))))
