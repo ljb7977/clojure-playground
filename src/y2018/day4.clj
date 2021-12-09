@@ -52,11 +52,12 @@
                                                   :start-minute (curr :start-minute)
                                                   :end-minute   new-minute})]
     (if (contains? updated-curr :end-minute)
-      {:result (conj result updated-curr) :curr {}}
+      {:result (conj result updated-curr) :curr updated-curr}
       {:result result :curr updated-curr})))
 
 (->> input-val
      sort
-     (take 10)
      (map parse)
-     (reduce process {:result [] :curr {}}))
+     (reduce process {:result [] :curr {}})
+     :result
+     (take 10))
