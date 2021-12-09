@@ -6,12 +6,13 @@
   (util/read-lines "y2018/day4.txt"))
 (def pattern #"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (wakes up|falls asleep|Guard #(\d+) begins shift)")
 
+; Integer/parseInt 한번에 할 수 있는 방법이 없을까?
 (defn to-map [[year month day hour minute action guard-id]]
-  {:year     year
-   :month    month
-   :day      day
-   :hour     hour
-   :minute   minute
+  {:year     (Integer/parseInt year)
+   :month    (Integer/parseInt month)
+   :day      (Integer/parseInt day)
+   :hour     (Integer/parseInt hour)
+   :minute   (Integer/parseInt minute)
    :action   action
    :guard-id guard-id})
 
@@ -22,24 +23,13 @@
        rest
        to-map))
 
-; acc
-;{:result [{:guard-id :month :day :start-minute :end-minute} ...]
-; :curr {:guard-id :month :day :start-minute}}
-;
-;val
-;{:guard-id
-; :action
-; :month
-; :day
-; :minute}
-
-(defn process [{result :result
-                curr :curr}
-               {new-action   :action
-                new-month    :month
-                new-day      :day
-                new-minute   :minute
-                new-guard-id :guard-id}]
+(defn records->sleeping-ranges [{result :result
+                                 curr    :curr}
+                                {new-action   :action
+                                 new-month    :month
+                                 new-day      :day
+                                 new-minute   :minute
+                                 new-guard-id :guard-id}]
   (let [updated-curr (cond ;get updated curr
                        (not (nil? new-guard-id)) {:guard-id new-guard-id}
                        (= new-action "falls asleep") {:guard-id     (curr :guard-id)
@@ -55,9 +45,20 @@
       {:result (conj result updated-curr) :curr updated-curr}
       {:result result :curr updated-curr})))
 
+(defn collect-minutes [result {guard-id :guard-id
+                               start :start-minute
+                               end :end-minute}]
+  (update result guard-id concat (range start end)))
+
 (->> input-val
      sort
      (map parse)
-     (reduce process {:result [] :curr {}})
+     (reduce records->sleeping-ranges {:result [] :curr {}})
      :result
-     (take 10))
+     (reduce collect-minutes {})
+     (apply max-key #(count (second %)))
+     ((fn [[id minutes]]
+       (* (Integer/parseInt id) (->> minutes
+                                    frequencies
+                                    (apply max-key #(second %))
+                                    first)))))
