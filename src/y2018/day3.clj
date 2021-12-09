@@ -14,53 +14,55 @@
    :x-size x-size
    :y-size y-size})
 
-(defn get-covered-points
-  "x, y, x-size, y-size에 기반하여 해당 fabric이 덮는 점들의 좌표 리스트를 구합니다.
+(defn get-covered-points-by-rect
+  "x, y, x-size, y-size에 기반하여 해당 직사각형이 덮는 점들의 좌표 리스트를 구합니다.
   Input: {:x 1 :y 3 :x-size 3 :y-size 2}
   Output: ([1 3] [1 4] [2 3] [2 4] [3 3] [3 4])
   "
-  [{x :x y :y x-size :x-size y-size :y-size}]
+  [{x :x y :y x-size :x-size y-size :y-size}] ; :keys []
   (for [dx (range x-size) dy (range y-size)] [(+ x dx) (+ y dy)]))
 
-(defn draw
-  "map 형태의 fabric을 입력으로 받아, 좌표평면의 어떤 점이 해당 fabric으로 덮이는지를 표현한 맵을 반환합니다.
+(defn square->coords-to-id-map
+  "map 형태의 직사각형을 입력으로 받아, 좌표평면의 어떤 점이 해당 사각형으로 덮이는지를 표현한 맵을 반환합니다.
   Input: {:idx 1 :x 1 :y 3 :x-size 3 :y-size 2}
-  Output: {[1 3] [1], [1 4] [1], [2 3] [1], [2 4] [1], [3 3] [1], [3 4] [1]}
+  Output: {[1 3] #{1}, [1 4] #{1}, [2 3] #{1}, [2 4] #{1}, [3 3] #{1}, [3 4] #{1}}
   "
   [f]
-  (zipmap (get-covered-points f) (repeat [(:idx f)])))
+  (zipmap (get-covered-points-by-rect f) (repeat #{(:idx f)})))
 
-(defn process-one-step [f]
+(defn parse [f]
   (->> f
        (re-seq pattern)
        first
        rest
        (map #(Integer/parseInt %))
-       input-list->map
-       draw))
+       input-list->map))
 
-; Test process-one-step
-(comment
-  (->> "#1 @ 1,2: 3x2"
-       process-one-step))
+; Test parse function
+;(->> "#1 @ 1,2: 3x2"
+;     parse)
 
-;------- Part 1 -------
+(defn remove-elems-from-set [s xs]
+  (apply disj s xs))
+
 (comment
+  ;------- Part 1 -------
   (->> input-val
-       (map process-one-step)
+       (map parse)
+       (map square->coords-to-id-map)
        (reduce #(merge-with into %1 %2) {})
        vals
        (filter #(> (count %) 1))
-       count))
+       count)
 
-;------- Part 2 -------
-(comment
-  (let [num-lines (count input-val)]
+  ;------- Part 2 -------
+  (let [num-lines (count input-val)
+        all-ids (set (range 1 (inc num-lines)))]
     (->> input-val
-         (map process-one-step)
+         (map parse)
+         (map square->coords-to-id-map)
          (reduce #(merge-with into %1 %2) {})
          vals
          (filter #(> (count %) 1))
-         (reduce (fn [acc val]
-                   (apply disj acc val)) (set (range 1 (inc num-lines))))
+         (reduce remove-elems-from-set all-ids)
          first)))
