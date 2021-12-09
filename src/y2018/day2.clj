@@ -1,7 +1,7 @@
 (ns y2018.day2
   (:require util))
 
-(def input-val (util/read-lines "day2.txt"))
+(def input-val (util/read-lines "y2018/day2.txt"))
 
 ; ------- Part 1 -------
 (defn exists-any-letter-appears-n-times?

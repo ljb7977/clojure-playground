@@ -1,7 +1,7 @@
 (ns y2018.day3
   (:require util))
 
-(def input-val (util/read-lines "day3.txt"))
+(def input-val (util/read-lines "y2018/day3.txt"))
 (def pattern #"#(\d+) @ (\d+).(\d+): (\d+)x(\d+)")
 (def example-line "#1247 @ 439,612: 25x27")
 
@@ -38,7 +38,10 @@
   (for [dx (range x-size) dy (range y-size)] [(+ x dx) (+ y dy)]))
 
 (defn draw
-  "map 형태의 fabric을 입력으로 받아, 좌표평면의 어떤 점이 해당 fabric으로 덮이는지를 표현한 맵을 반환합니다."
+  "map 형태의 fabric을 입력으로 받아, 좌표평면의 어떤 점이 해당 fabric으로 덮이는지를 표현한 맵을 반환합니다.
+  Input: {:idx 1 :x 1 :y 3 :x-size 3 :y-size 2}
+  Output: {[1 3] [1], [1 4] [1], [2 3] [1], [2 4] [1], [3 3] [1], [3 4] [1]}
+  "
   [f]
   (zipmap (get-covered-points f) (repeat [(:idx f)])))
 

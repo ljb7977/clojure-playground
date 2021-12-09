@@ -1,6 +1,5 @@
 (ns y2018.day4
   (:require [util]))
-(require '[clojure.core.match :refer [match]])
 
 (def input-val
   (util/read-lines "y2018/day4.txt"))
