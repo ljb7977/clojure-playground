@@ -19,11 +19,12 @@
   Input: {:x 1 :y 3 :x-size 3 :y-size 2}
   Output: ([1 3] [1 4] [2 3] [2 4] [3 3] [3 4])
   "
-  [{x :x y :y x-size :x-size y-size :y-size}] ; :keys []
+  [{:keys [x y x-size y-size]}]
   (for [dx (range x-size) dy (range y-size)] [(+ x dx) (+ y dy)]))
 
-(defn square->coords-to-id-map
+(defn rect->coords-to-id-map
   "map 형태의 직사각형을 입력으로 받아, 좌표평면의 어떤 점이 해당 사각형으로 덮이는지를 표현한 맵을 반환합니다.
+  맵의 val은 해당 사각형의 id를 담는 크기 1짜리 set입니다 (나중에 reduce에서 편하게 쓰기 위함).
   Input: {:idx 1 :x 1 :y 3 :x-size 3 :y-size 2}
   Output: {[1 3] #{1}, [1 4] #{1}, [2 3] #{1}, [2 4] #{1}, [3 3] #{1}, [3 4] #{1}}
   "
@@ -49,7 +50,7 @@
   ;------- Part 1 -------
   (->> input-val
        (map parse)
-       (map square->coords-to-id-map)
+       (map rect->coords-to-id-map)
        (reduce #(merge-with into %1 %2) {})
        vals
        (filter #(> (count %) 1))
@@ -60,7 +61,7 @@
         all-ids (set (range 1 (inc num-lines)))]
     (->> input-val
          (map parse)
-         (map square->coords-to-id-map)
+         (map rect->coords-to-id-map)
          (reduce #(merge-with into %1 %2) {})
          vals
          (filter #(> (count %) 1))
