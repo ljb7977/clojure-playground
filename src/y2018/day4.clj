@@ -22,32 +22,30 @@
        rest
        to-map))
 
-(defn records->sleeping-ranges [{result :result
-                                 curr    :curr}
-                                {new-action   :action
-                                 new-month    :month
-                                 new-day      :day
-                                 new-minute   :minute
-                                 new-guard-id :guard-id}]
-  (let [updated-curr (cond ;get updated curr
-                       (not (nil? new-guard-id)) {:guard-id new-guard-id}
-                       (= new-action "falls asleep") {:guard-id     (curr :guard-id)
-                                                      :month        new-month
-                                                      :day          new-day
-                                                      :start-minute new-minute}
-                       (= new-action "wakes up") {:guard-id     (curr :guard-id)
-                                                  :month        (curr :month)
-                                                  :day          (curr :day)
-                                                  :start-minute (curr :start-minute)
-                                                  :end-minute   new-minute})]
+; 자료구조가 불안불안하다...
+(defn records->sleeping-ranges [{:keys [result curr]}
+                                {:keys [action month day minute guard-id]}]
+  (let [updated-curr (cond
+                       (not (nil? guard-id)) {:guard-id guard-id}
+                       (= action "falls asleep") {:guard-id     (curr :guard-id)
+                                                  :month        month
+                                                  :day          day
+                                                  :start-minute minute}
+                       (= action "wakes up") {:guard-id     (curr :guard-id)
+                                              :month        (curr :month)
+                                              :day          (curr :day)
+                                              :start-minute (curr :start-minute)
+                                              :end-minute   minute})]
     (if (contains? updated-curr :end-minute)
       {:result (conj result updated-curr) :curr updated-curr}
       {:result result :curr updated-curr})))
 
-(defn collect-minutes [result {guard-id :guard-id
-                               start :start-minute
-                               end :end-minute}]
-  (update result guard-id concat (range start end)))
+(defn collect-minutes
+  "Input: {1 '(1 2 3), 2 '(10 11 12)}, {:guard-id 1 :start-minute 6 :end-minute 10}
+  Output: {1 (1 2 3 6 7 8 9), 2 (10 11 12)}
+  "
+  [minutes {:keys [guard-id start-minute end-minute]}]
+  (update minutes guard-id concat (range start-minute end-minute)))
 
 (defn get-frequencies [[id xs]]
   [id (frequencies xs)])
