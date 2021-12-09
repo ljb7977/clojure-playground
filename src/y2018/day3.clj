@@ -35,7 +35,7 @@
        (re-seq pattern)
        first
        rest
-       (map util/parse-int)
+       (map #(Integer/parseInt %))
        input-list->map
        draw))
 
