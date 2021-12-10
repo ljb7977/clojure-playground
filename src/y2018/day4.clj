@@ -6,21 +6,21 @@
 (def pattern #"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (wakes up|falls asleep|Guard #(\d+) begins shift)")
 
 ; Integer/parseInt 한번에 할 수 있는 방법이 없을까?
-(defn to-map [[year month day hour minute action guard-id]]
+(defn ->action-record-map [[year month day hour minute action guard-id]]
   {:year     (Integer/parseInt year)
    :month    (Integer/parseInt month)
    :day      (Integer/parseInt day)
    :hour     (Integer/parseInt hour)
    :minute   (Integer/parseInt minute)
    :action   action
-   :guard-id (if (nil? guard-id) nil (Integer/parseInt guard-id))})
+   :guard-id (if-let [guard-id guard-id] (Integer/parseInt guard-id) nil)})
 
 (defn parse [f]
   (->> f
        (re-seq pattern)
        flatten
        rest
-       to-map))
+       ->action-record-map))
 
 ; 자료구조가 불안불안하다...
 (defn records->sleeping-ranges [{:keys [result curr]}
