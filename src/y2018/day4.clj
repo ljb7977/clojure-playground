@@ -90,6 +90,16 @@
   [m]
   (apply max (vals m)))
 
+(defn find-most-frequent-one
+  "주어진 시퀀스에서 가장 빈도가 높은 원소를 구합니다.
+  Input: [1 1 2 2 3 3 3]
+  Output: 3"
+  [xs]
+  (->> xs
+       frequencies
+       (apply max-key #(second %))
+       first))
+
 (comment
   ; ----- Part 1
   (->> input-val
@@ -99,11 +109,8 @@
        :result
        (reduce collect-minutes {})
        (apply max-key #(count (second %)))
-       ((fn [[id minutes]]
-         (* id (->> minutes
-                   frequencies
-                   (apply max-key #(second %))
-                   first)))))
+       (apply (fn [id minutes] (* id (find-most-frequent-one minutes)))))
+       ;((fn [[id minutes]] (* id (find-most-frequent-one minutes)))))  어떤 게 더 나을까요?
   ; ----- Part 2
   (->> input-val
        sort
@@ -113,5 +120,4 @@
        (reduce collect-minutes {})
        (map get-frequencies)
        (apply max-key #(max-val-of-map (second %)))
-       ((fn [[id minute-map]]
-          (* id (first (apply max-key second (seq minute-map))))))))
+       ((fn [[id minute-map]] (* id (first (apply max-key second (seq minute-map))))))))
