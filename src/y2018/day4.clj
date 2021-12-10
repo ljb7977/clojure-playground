@@ -1,10 +1,8 @@
 (ns y2018.day4
   (:require [util]))
 
-(def input-val
-  (util/read-lines "y2018/day4.txt"))
-;(def input-val
-;  (util/read-lines "y2018/day4-example.txt"))
+;(def input-val (util/read-lines "y2018/day4.txt"))
+(def input-val (util/read-lines "y2018/day4-example.txt"))
 (def pattern #"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (wakes up|falls asleep|Guard #(\d+) begins shift)")
 
 ; Integer/parseInt 한번에 할 수 있는 방법이 없을까?
@@ -101,7 +99,7 @@
        first))
 
 (comment
-  ; ----- Part 1
+  ; ----- Part 1: 가장 잠을 많이 잔 가드가, 가장 많이 잠들어있던 minute와 그 가드 id의 곱
   (->> input-val
        sort
        (map parse)
@@ -111,7 +109,8 @@
        (apply max-key #(count (second %)))
        (apply (fn [id minutes] (* id (find-most-frequent-one minutes)))))
        ;((fn [[id minutes]] (* id (find-most-frequent-one minutes)))))  어떤 게 더 나을까요?
-  ; ----- Part 2
+  
+  ; ----- Part 2: 한 minute에 가장 자주 잠들어있던 가드의 id와, 그 해당 minute의 곱
   (->> input-val
        sort
        (map parse)
@@ -119,5 +118,5 @@
        :result
        (reduce collect-minutes {})
        (map get-frequencies)
-       (apply max-key #(max-val-of-map (second %)))
-       ((fn [[id minute-map]] (* id (first (apply max-key second (seq minute-map))))))))
+       (apply max-key #(max-val-of-map (second %))) ; 명시적으로 바인딩을 더 잘 해주고 싶은데...
+       ((fn [[id minute-map]] (* id (first (apply max-key second (seq minute-map)))))))) ; 여기 함수로 잘 빼줘야 할듯
