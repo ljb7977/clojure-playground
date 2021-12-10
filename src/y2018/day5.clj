@@ -52,8 +52,36 @@
             (let [removed (remove-matching-pairs prev)]
               (if (= removed prev) (reduced prev) removed))) s (repeat nil)))
 
+(def all-alphabets "abcdefghijklmnopqrstuvwxyz")
+(defn lower-case [c]
+  (->> c
+       str
+       clojure.string/lower-case
+       first))
+
+(defn remove-alphabet-from-string
+  "소문자 하나(c)와 문자열을 받아서, 문자열로부터 대소문자에 관계 없이 c를 모두 제거합니다.
+  Input: c abcdedCCda
+  Output: abdedda
+  "
+  [c s]
+  (reduce (fn [acc v]
+            (if (= c (lower-case v)) acc (str acc v))) "" s))
+
+(defn remove-one-alphabet-and-react [a s]
+  (->> s
+       (remove-alphabet-from-string a)
+       (remove-until-no-change)
+       (apply str)))
+
 (comment
   ; ---- Part 1
   (->> input-val
        remove-until-no-change
-       count))
+       count)
+
+  ; ---- Part 2
+  (->>
+    (for [a all-alphabets] (remove-one-alphabet-and-react a input-val))
+    (map count)
+    (apply min)))
