@@ -40,7 +40,7 @@
        (map #(clojure.string/split % #":"))
        (map (fn [[k v]] [(keyword k) v]))
        (into (sorted-map))))
-(->passport-map ["hcl:#bc352c" "pid:321838059" "byr:1930" "hgt:178cm" "cid:213" "eyr:2023" "ecl:amb" "iyr:2017"])
+;(->passport-map ["hcl:#bc352c" "pid:321838059" "byr:1930" "hgt:178cm" "cid:213" "eyr:2023" "ecl:amb" "iyr:2017"])
 
 (defn parse [x]
   (->> x
@@ -58,19 +58,19 @@
 
 (def validators
   {:byr #(if-let [num (Integer/parseInt %)]
-            (and (>= num 1920) (<= num 2002))
+            (<= 1920 num 2002)
             false)
    :iyr #(if-let [num (Integer/parseInt %)]
-            (and (>= num 2010) (<= num 2020))
+            (<= 2010 num 2020)
             false)
    :eyr #(if-let [num (Integer/parseInt %)]
-            (and (>= num 2020) (<= num 2030))
+            (<= 2020 num 2030)
             false)
    :hgt #(if-let [[[_, num, unit]] (re-seq #"^(\d+)(cm|in)$" %)]
            (let [num (Integer/parseInt num)]
              (cond
-               (= unit "cm") (and (>= num 150) (<= num 193))
-               (= unit "in") (and (>= num 59) (<= num 76))))
+               (= unit "cm") (<= 150 num 193)
+               (= unit "in") (<= 59 num 76)))
            false)
    :hcl #(if-let [[color] (re-seq #"^#[a-f|0-9]{6}$" %)]
            true
