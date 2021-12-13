@@ -66,17 +66,17 @@
    :eyr #(if-let [num (Integer/parseInt %)]
             (and (>= num 2020) (<= num 2030))
             false)
-   :hgt #(if-let [[[_, num, unit]] (re-seq #"(\d+)(cm|in)" %)]
+   :hgt #(if-let [[[_, num, unit]] (re-seq #"^(\d+)(cm|in)$" %)]
            (let [num (Integer/parseInt num)]
              (cond
-               (= unit "in") (and (>= num 59) (<= num 76))
-               (= unit "cm") (and (>= num 150) (<= num 193))))
+               (= unit "cm") (and (>= num 150) (<= num 193))
+               (= unit "in") (and (>= num 59) (<= num 76))))
            false)
-   :hcl #(if-let [[color] (re-seq #"#[a-f|0-9]{6}" %)]
+   :hcl #(if-let [[color] (re-seq #"^#[a-f|0-9]{6}$" %)]
            true
            false)
    :ecl #(valid-eye-colors (keyword %))
-   :pid #(if-let [[num] (re-seq #"0\d{8}" %)]
+   :pid #(if-let [[num] (re-seq #"^\d{9}$" %)]
            true
            false)})
 
