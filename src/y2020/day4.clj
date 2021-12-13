@@ -86,9 +86,10 @@
     true))
 
 (defn valid-passport? [m]
-  (->> m
-       seq
-       (every? get-validator-and-validate)))
+  (and (has-valid-keys? m)
+       (->> m
+            seq
+            (every? get-validator-and-validate))))
 
 ;(valid-passport?
 ;  {:byr "1925", :ecl "gry", :eyr "2024", :hcl "#ceb3a1", :hgt "173cm", :iyr "2013", :pid "070222017"})
