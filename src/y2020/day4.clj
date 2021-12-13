@@ -40,6 +40,7 @@
        (map #(clojure.string/split % #":"))
        (map (fn [[k v]] [(keyword k) v]))
        (into (sorted-map))))
+(->passport-map ["hcl:#bc352c" "pid:321838059" "byr:1930" "hgt:178cm" "cid:213" "eyr:2023" "ecl:amb" "iyr:2017"])
 
 (defn parse [x]
   (->> x
@@ -52,10 +53,57 @@
 (defn has-valid-keys? [m]
   (every? (set (keys m)) valid-passport-keys))
 
+(def valid-eye-colors
+  #{:amb :blu :brn :gry :grn :hzl :oth})
+
+(def validators
+  {:byr #(if-let [num (Integer/parseInt %)]
+            (and (>= num 1920) (<= num 2002))
+            false)
+   :iyr #(if-let [num (Integer/parseInt %)]
+            (and (>= num 2010) (<= num 2020))
+            false)
+   :eyr #(if-let [num (Integer/parseInt %)]
+            (and (>= num 2020) (<= num 2030))
+            false)
+   :hgt #(if-let [[[_, num, unit]] (re-seq #"(\d+)(cm|in)" %)]
+           (let [num (Integer/parseInt num)]
+             (cond
+               (= unit "in") (and (>= num 59) (<= num 76))
+               (= unit "cm") (and (>= num 150) (<= num 193))))
+           false)
+   :hcl #(if-let [[color] (re-seq #"#[a-f|0-9]{6}" %)]
+           true
+           false)
+   :ecl #(valid-eye-colors (keyword %))
+   :pid #(if-let [[num] (re-seq #"0\d{8}" %)]
+           true
+           false)})
+
+(defn get-validator-and-validate [[k v]]
+  (if-let [validator (get validators k)]
+    (validator v)
+    true))
+
+(defn valid-passport? [m]
+  (->> m
+       seq
+       (every? get-validator-and-validate)))
+
+;(valid-passport?
+;  {:byr "1925", :ecl "gry", :eyr "2024", :hcl "#ceb3a1", :hgt "173cm", :iyr "2013", :pid "070222017"})
+
 (comment
   ; Part 1
   (->> input-val
        parse
        (map has-valid-keys?)
+       (filter true?)
+       count)
+
+  ; Part 2
+  (->> input-val
+       parse
+       (map valid-passport?)
        (filter true?)
        count))
