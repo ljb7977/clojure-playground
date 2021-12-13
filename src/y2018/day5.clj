@@ -37,27 +37,15 @@
           []
           s))
 
-;(remove-matching-pairs example-input)
-
-(defn remove-until-no-change [s]
-  (loop [prev s]
-    (let [removed (remove-matching-pairs prev)]
-      (if (= removed prev)
-        removed
-        (recur removed)))))
-
-; reduce 버전. loop-recur보다 나은가...? 아니면 더 깔쌈한 방법이 있을지...?
-(defn remove-until-no-change-2 [s]
-  (reduce (fn [prev _]
-            (let [removed (remove-matching-pairs prev)]
-              (if (= removed prev) (reduced prev) removed))) s (repeat nil)))
-
 (def all-alphabets "abcdefghijklmnopqrstuvwxyz")
+
 (defn lower-case [c]
-  (->> c
-       str
-       clojure.string/lower-case
-       first))
+  (let [c-code (int c)]
+    (if
+      (<= 65 c-code 90)
+      (char (+ c-code 32))
+      c)))
+; sequence는 thread-last, collection은 thread-first인 경향이 있다
 
 (defn remove-alphabet-from-string
   "소문자 하나(c)와 문자열을 받아서, 문자열로부터 대소문자에 관계 없이 c를 모두 제거합니다.
@@ -71,17 +59,16 @@
 (defn remove-one-alphabet-and-react [a s]
   (->> s
        (remove-alphabet-from-string a)
-       (remove-until-no-change)
-       (apply str)))
+       remove-matching-pairs))
 
 (comment
   ; ---- Part 1
   (->> input-val
-       remove-until-no-change
+       remove-matching-pairs
        count)
 
   ; ---- Part 2
-  (->>
-    (for [a all-alphabets] (remove-one-alphabet-and-react a input-val))
-    (map count)
-    (apply min)))
+  (time (->>
+          (for [a all-alphabets] (remove-one-alphabet-and-react a input-val))
+          (pmap count)
+          (apply min))))
