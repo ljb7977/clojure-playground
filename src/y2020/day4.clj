@@ -1,5 +1,6 @@
 (ns y2020.day4
-  (:require util))
+  (:require [util]
+            [clojure.spec.alpha :as s]))
 
 (def input-val
   (-> (slurp "resources/y2020/day4.txt")
