@@ -96,14 +96,12 @@
         target-ids-which-grow-infinitely (->> points-at-border
                                               (map :closest-target-id)
                                               set)]
-    ;points-to-targets))
-
     ; Part 1
     (->> point-and-its-closest-target
-         (filter (fn [{:keys [closest-target-id]}] (not (target-ids-which-grow-infinitely closest-target-id))))
+         (remove (fn [{:keys [closest-target-id]}] (target-ids-which-grow-infinitely closest-target-id)))
          (map :closest-target-id)
          frequencies
-         (map second)
+         vals
          (apply max)
          println)
 
