@@ -24,7 +24,7 @@
      :xmax (apply max xs)
      :ymax (apply max ys)}))
 
-(defn get-points-in-range [{:keys [xmin xmax ymin ymax]}]
+(defn get-points-in-border [{:keys [xmin xmax ymin ymax]}]
   (for [x (range xmin (inc xmax))
         y (range ymin (inc ymax))]
     [x y]))
@@ -57,18 +57,30 @@
     {:location          location
      :closest-coord-ids closest-coord-ids}))
 
+(defn point-at-border? [[x y] {:keys [xmin ymin xmax ymax]}]
+  (or (= x xmin) (= y ymin) (= x xmax) (= y ymax)))
+
 (comment
-  (let [min-max-points (find-min-max-coords input-val)
-        locations (get-points-in-range min-max-points)
+  (let [border (find-min-max-coords input-val)
+        locations (get-points-in-border border)
         coords (map-indexed vector input-val)
-        locations-to-coords (get-distance-to-each-coords locations coords)]
-    (->> locations-to-coords
-         (group-by :location)
-         (map keep-closest-coords)
-         (filter (fn [{:keys [location closest-coord-ids]}]
-                     (= 1 (count closest-coord-ids))))
+        locations-to-coords (get-distance-to-each-coords locations coords)
+        location-and-its-closest-coord (->> locations-to-coords
+                                            (group-by :location)
+                                            (map keep-closest-coords)
+                                            (filter (fn [{:keys [location closest-coord-ids]}]
+                                                      (= 1 (count closest-coord-ids))))
+                                            (map #(update % :closest-coord-ids first)))
+        locations-at-border (->> location-and-its-closest-coord
+                                 (filter (fn [{:keys [location]}]
+                                           (point-at-border? location border))))
+        coord-ids-that-reach-border (->> locations-at-border
+                                         (map :closest-coord-ids)
+                                         set)]
+
+    (->> location-and-its-closest-coord
+         (filter (fn [{:keys [closest-coord-ids]}] (not (coord-ids-that-reach-border closest-coord-ids))))
          (map :closest-coord-ids)
-         (flatten)
          frequencies
          (map second)
          (apply max))))
