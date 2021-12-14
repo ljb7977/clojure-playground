@@ -60,6 +60,11 @@
 (defn point-at-border? [[x y] {:keys [xmin ymin xmax ymax]}]
   (or (= x xmin) (= y ymin) (= x xmax) (= y ymax)))
 
+(defn sum-distances [[_, ms]]
+  (->> ms
+       (map :distance)
+       (apply +)))
+
 (comment
   (let [border (find-min-max-coords input-val)
         locations (get-points-in-border border)
@@ -84,4 +89,13 @@
          (map :closest-coord-id)
          frequencies
          (map second)
-         (apply max))))
+         (apply max)
+         println)
+
+    ; Part 2
+    (->> locations-to-coords
+         (group-by :location)
+         (map sum-distances)
+         (filter #(< % 10000))
+         count
+         println)))
