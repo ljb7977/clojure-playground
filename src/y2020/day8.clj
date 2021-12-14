@@ -22,8 +22,41 @@
         acc
         (recur new-acc new-op-id (conj op-visited? op-id))))))
 
+(defn acc-after-program-terminates [ops]
+  (loop [acc 0 op-id 0 op-visited? #{}]
+    (let [{new-acc :acc new-op-id :op-id} (next-step {:acc acc :op-id op-id :ops ops})]
+      (cond
+        (op-visited? new-op-id) nil
+        (>= new-op-id (count ops)) new-acc
+        :else (recur new-acc new-op-id (conj op-visited? op-id))))))
+
+(defn swap-jmp-and-nop-at [idx ops]
+  (let [[op arg] (nth ops idx)
+        new-op (case op
+                 :jmp :nop
+                 :nop :jmp)]
+    (assoc ops idx [new-op arg])))
+
+(defn get-indices-of-jmp-or-nop [ops]
+  (->> ops
+       (map-indexed vector)
+       (filter (fn [[idx [op arg]]] (or (= op :nop) (= op :jmp))))
+       (map first)))
+
+(defn generate-candidate-ops [ops]
+  (let [jmp-or-nop-indices (get-indices-of-jmp-or-nop ops)]
+    (for [idx jmp-or-nop-indices] (swap-jmp-and-nop-at idx ops))))
+
 (comment
   ; Part 1
-  (let [ops (->> input-val
-                 (map parse))]
-    (do-until-loop-detected ops)))
+  (->> input-val
+       (map parse)
+       do-until-loop-detected)
+
+  ;Part 2
+  (->> input-val
+       (map parse)
+       vec
+       generate-candidate-ops
+       (keep acc-after-program-terminates)
+       first))
