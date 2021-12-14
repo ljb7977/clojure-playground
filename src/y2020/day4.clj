@@ -12,15 +12,17 @@
      (catch Exception e x)))
 
 (defn parse-values [{:keys [byr cid ecl eyr
-                            hcl hgt iyr pid]}]
-  {:byr (parse-int-if-available byr)
-   :iyr (parse-int-if-available iyr)
-   :eyr (parse-int-if-available eyr)
-   :pid pid
-   :hcl hcl
-   :hgt hgt
-   :ecl (keyword ecl)
-   :cid cid})
+                            hcl hgt iyr pid]
+                     :as all}]
+  (merge all
+         {:byr (parse-int-if-available byr)
+          :iyr (parse-int-if-available iyr)
+          :eyr (parse-int-if-available eyr)
+          :pid pid
+          :hcl hcl
+          :hgt hgt
+          :ecl (keyword ecl)
+          :cid cid}))
 
 (defn ->passport-map [xs]
   "
@@ -46,9 +48,6 @@
 
 (s/def :passport/eye-colors #{:amb :blu :brn :gry :grn :hzl :oth})
 
-(defn num-in-range? [num start end]
-  (<= start num end))
-
 (defn valid-height? [s]
   (if-let [[[_, num, unit]] (re-seq #"^(\d+)(cm|in)$" s)]
     (let [num (Integer/parseInt num)]
@@ -57,9 +56,9 @@
         (= unit "in") (<= 59 num 76)))
     false))
 
-(s/def :passport/byr (s/and int? #(num-in-range? % 1920 2002)))
-(s/def :passport/iyr (s/and int? #(num-in-range? % 2010 2020)))
-(s/def :passport/eyr (s/and int? #(num-in-range? % 2020 2030)))
+(s/def :passport/byr (s/and int? #(<= 1920 % 2002)))
+(s/def :passport/iyr (s/and int? #(<= 2010 % 2020)))
+(s/def :passport/eyr (s/and int? #(<= 2020 % 2030)))
 (s/def :passport/hgt (s/and string? valid-height?))
 (s/def :passport/hcl (s/and string? #(re-matches #"^#[a-f|0-9]{6}$" %)))
 (s/def :passport/ecl (s/and keyword? #(s/valid? :passport/eye-colors %)))
