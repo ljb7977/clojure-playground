@@ -11,8 +11,6 @@
      (Integer/parseInt x)
      (catch Exception e x)))
 
-(def required-keys #{:byr :iyr :eyr :hgt :hcl :ecl :pid})
-
 (defn parse-values [{:keys [byr cid ecl eyr
                             hcl hgt iyr pid]}]
   {:byr (parse-int-if-available byr)
@@ -42,8 +40,9 @@
        (map #(clojure.string/split % #"\s"))
        (map ->passport-map)))
 
+(def required-keys #{:byr :iyr :eyr :hgt :hcl :ecl :pid})
 (defn has-required-keys? [m]
-  (every? (set (keys m)) required-keys))
+  (every? m required-keys))
 
 (s/def :passport/eye-colors #{:amb :blu :brn :gry :grn :hzl :oth})
 
