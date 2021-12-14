@@ -56,9 +56,9 @@
         (= unit "in") (<= 59 num 76)))
     false))
 
-(s/def :passport/byr (s/and int? #(<= 1920 % 2002)))
-(s/def :passport/iyr (s/and int? #(<= 2010 % 2020)))
-(s/def :passport/eyr (s/and int? #(<= 2020 % 2030)))
+(s/def :passport/byr (s/int-in 1920 2003))
+(s/def :passport/iyr (s/int-in 2010 2021))
+(s/def :passport/eyr (s/int-in 2020 2031))
 (s/def :passport/hgt (s/and string? valid-height?))
 (s/def :passport/hcl (s/and string? #(re-matches #"^#[a-f|0-9]{6}$" %)))
 (s/def :passport/ecl (s/and keyword? #(s/valid? :passport/eye-colors %)))
