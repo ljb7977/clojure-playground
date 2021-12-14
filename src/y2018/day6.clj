@@ -13,10 +13,16 @@
 (defn abs [x]
   (max x (- x)))
 
-(defn get-distance [[x1 y1] [x2 y2]]
+(defn get-manhattan-distance [[x1 y1] [x2 y2]]
+  "두 좌표의 맨해튼 거리를 구합니다.
+  Input: [[1 3] [2 1]]
+  Output: 3"
   (+ (abs (- x2 x1)) (abs (- y2 y1))))
 
 (defn find-min-max-coords [coords]
+  "좌표 리스트를 받아서 가장 바깥 x, y 좌표들을 구합니다.
+  Input: [(1 2) (3 4) (100 3) (3 100)]
+  Output: {:xmin 1 :ymin 2 :xmax 100 :ymax 100}"
   (let [xs (map first coords)
         ys (map second coords)]
     {:xmin (apply min xs)
@@ -24,38 +30,42 @@
      :xmax (apply max xs)
      :ymax (apply max ys)}))
 
-(defn get-points-in-border [{:keys [xmin xmax ymin ymax]}]
+(defn get-points-in-border
+  "경계선 안쪽에 속하는 점들의 좌표를 리스트로 반환합니다.
+  Input: {:xmin 1 :ymin 2 :xmax 4 :ymax 3}
+  Output: ([1 2] [1 3] [2 2] [2 3] [3 2] [3 3] [4 2] [4 3])"
+  [{:keys [xmin xmax ymin ymax]}]
   (for [x (range xmin (inc xmax))
         y (range ymin (inc ymax))]
     [x y]))
 
-(defn get-distance-to-each-coords [locations coords]
-  (for [location locations [coord-id coord-point] coords]
-    {:location location
-     :coord-id coord-id
-     :distance (get-distance location coord-point)}))
+(defn get-distance-to-each-targets [locations targets]
+  (for [location locations [target-id target-coord] targets]
+    {:location  location
+     :target-id target-id
+     :distance  (get-manhattan-distance location target-coord)}))
 
-(defn keep-closest-coords
+(defn keep-closest-targets
   "
   Input:
   [[3 2]
-    [{:location [3 2], :coord-id 0, :distance 3}
-    {:location [3 2], :coord-id 1, :distance 6}
-    {:location [3 2], :coord-id 2, :distance 2}
-    {:location [3 2], :coord-id 3, :distance 2}
-    {:location [3 2], :coord-id 4, :distance 5}
-    {:location [3 2], :coord-id 5, :distance 12}]]
-  Output: {:location [3 2] :closest-coord-id (2 3)}
+    [{:location [3 2], :target-id 0, :distance 3}
+    {:location [3 2], :target-id 1, :distance 6}
+    {:location [3 2], :target-id 2, :distance 2}
+    {:location [3 2], :target-id 3, :distance 2}
+    {:location [3 2], :target-id 4, :distance 5}
+    {:location [3 2], :target-id 5, :distance 12}]]
+  Output: {:location [3 2] :closest-target-id (2 3)}
   "
   [[location ms]]
   (let [shortest-distance (->> ms
                                (map :distance)
                                (apply min))
-        closest-coord-id (->> ms
-                              (filter #(= (:distance %) shortest-distance))
-                              (map :coord-id))]
-    {:location         location
-     :closest-coord-id closest-coord-id}))
+        closest-target-id (->> ms
+                               (filter #(= (:distance %) shortest-distance))
+                               (map :target-id))]
+    {:location          location
+     :closest-target-id closest-target-id}))
 
 (defn point-at-border? [[x y] {:keys [xmin ymin xmax ymax]}]
   (or (= x xmin) (= y ymin) (= x xmax) (= y ymax)))
@@ -68,32 +78,32 @@
 (comment
   (let [border (find-min-max-coords input-val)
         locations (get-points-in-border border)
-        coords (map-indexed vector input-val)
-        locations-to-coords (get-distance-to-each-coords locations coords)
-        location-and-its-closest-coord (->> locations-to-coords
-                                            (group-by :location)
-                                            (map keep-closest-coords)
-                                            (filter (fn [{:keys [location closest-coord-id]}]
-                                                      (= 1 (count closest-coord-id))))
-                                            (map #(update % :closest-coord-id first)))
-        locations-at-border (->> location-and-its-closest-coord
+        targets (map-indexed vector input-val)
+        locations-to-targets (get-distance-to-each-targets locations targets)
+        location-and-its-closest-target (->> locations-to-targets
+                                             (group-by :location)
+                                             (map keep-closest-targets)
+                                             (filter (fn [{:keys [location closest-target-id]}]
+                                                       (= 1 (count closest-target-id))))
+                                             (map #(update % :closest-target-id first)))
+        locations-at-border (->> location-and-its-closest-target
                                  (filter (fn [{:keys [location]}]
                                            (point-at-border? location border))))
-        coord-ids-that-reach-border (->> locations-at-border
-                                         (map :closest-coord-id)
-                                         set)]
+        target-ids-which-grow-infinitely (->> locations-at-border
+                                              (map :closest-target-id)
+                                              set)]
 
     ; Part 1
-    (->> location-and-its-closest-coord
-         (filter (fn [{:keys [closest-coord-id]}] (not (coord-ids-that-reach-border closest-coord-id))))
-         (map :closest-coord-id)
+    (->> location-and-its-closest-target
+         (filter (fn [{:keys [closest-target-id]}] (not (target-ids-which-grow-infinitely closest-target-id))))
+         (map :closest-target-id)
          frequencies
          (map second)
          (apply max)
          println)
 
     ; Part 2
-    (->> locations-to-coords
+    (->> locations-to-targets
          (group-by :location)
          (map sum-distances)
          (filter #(< % 10000))
