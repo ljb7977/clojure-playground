@@ -39,32 +39,36 @@
         y (range ymin (inc ymax))]
     [x y]))
 
-(defn get-distance-to-each-targets [locations targets]
-  (for [location locations [target-id target-coord] targets]
-    {:location  location
+(defn get-distance-to-each-targets
+  "
+  각 점으로부터 각 target까지의 맨해튼 거리를 구한 map의 리스트를 반환합니다.
+  "
+  [points targets]
+  (for [point points [target-id target-coord] targets]
+    {:point     point
      :target-id target-id
-     :distance  (get-manhattan-distance location target-coord)}))
+     :distance  (get-manhattan-distance point target-coord)}))
 
 (defn keep-closest-targets
   "
   Input:
   [[3 2]
-    [{:location [3 2], :target-id 0, :distance 3}
-    {:location [3 2], :target-id 1, :distance 6}
-    {:location [3 2], :target-id 2, :distance 2}
-    {:location [3 2], :target-id 3, :distance 2}
-    {:location [3 2], :target-id 4, :distance 5}
-    {:location [3 2], :target-id 5, :distance 12}]]
-  Output: {:location [3 2] :closest-target-id (2 3)}
+    [{:point [3 2], :target-id 0, :distance 3}
+    {:point [3 2], :target-id 1, :distance 6}
+    {:point [3 2], :target-id 2, :distance 2}
+    {:point [3 2], :target-id 3, :distance 2}
+    {:point [3 2], :target-id 4, :distance 5}
+    {:point [3 2], :target-id 5, :distance 12}]]
+  Output: {:point [3 2] :closest-target-id (2 3)}
   "
-  [[location ms]]
+  [[point ms]]
   (let [shortest-distance (->> ms
                                (map :distance)
                                (apply min))
         closest-target-id (->> ms
                                (filter #(= (:distance %) shortest-distance))
                                (map :target-id))]
-    {:location          location
+    {:point             point
      :closest-target-id closest-target-id}))
 
 (defn point-at-border? [[x y] {:keys [xmin ymin xmax ymax]}]
@@ -77,24 +81,25 @@
 
 (comment
   (let [border (find-min-max-coords input-val)
-        locations (get-points-in-border border)
+        points (get-points-in-border border)
         targets (map-indexed vector input-val)
-        locations-to-targets (get-distance-to-each-targets locations targets)
-        location-and-its-closest-target (->> locations-to-targets
-                                             (group-by :location)
-                                             (map keep-closest-targets)
-                                             (filter (fn [{:keys [location closest-target-id]}]
-                                                       (= 1 (count closest-target-id))))
-                                             (map #(update % :closest-target-id first)))
-        locations-at-border (->> location-and-its-closest-target
-                                 (filter (fn [{:keys [location]}]
-                                           (point-at-border? location border))))
-        target-ids-which-grow-infinitely (->> locations-at-border
+        points-to-targets (get-distance-to-each-targets points targets)
+        point-and-its-closest-target (->> points-to-targets
+                                          (group-by :point)
+                                          (map keep-closest-targets)
+                                          (filter (fn [{:keys [point closest-target-id]}]
+                                                    (= 1 (count closest-target-id))))
+                                          (map #(update % :closest-target-id first)))
+        points-at-border (->> point-and-its-closest-target
+                              (filter (fn [{:keys [point]}]
+                                        (point-at-border? point border))))
+        target-ids-which-grow-infinitely (->> points-at-border
                                               (map :closest-target-id)
                                               set)]
+    ;points-to-targets))
 
     ; Part 1
-    (->> location-and-its-closest-target
+    (->> point-and-its-closest-target
          (filter (fn [{:keys [closest-target-id]}] (not (target-ids-which-grow-infinitely closest-target-id))))
          (map :closest-target-id)
          frequencies
@@ -103,8 +108,8 @@
          println)
 
     ; Part 2
-    (->> locations-to-targets
-         (group-by :location)
+    (->> points-to-targets
+         (group-by :point)
          (map sum-distances)
          (filter #(< % 10000))
          count
