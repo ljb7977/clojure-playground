@@ -11,6 +11,20 @@
      (Integer/parseInt x)
      (catch Exception e x)))
 
+(defn parse-height [s]
+  "Input: 180cm
+  Output: {:num 180 :unit :cm}
+
+  Input: 200m
+  Output: nil
+  "
+  (if
+    (nil? s)
+    nil
+    (if-let [[[_ num unit]] (re-seq #"^(\d+)(cm|in)$" s)]
+      {:num (Integer/parseInt num)
+       :unit (keyword unit)})))
+
 (defn parse-values [{:keys [byr cid ecl eyr
                             hcl hgt iyr pid]
                      :as all}]
@@ -20,7 +34,7 @@
           :eyr (parse-int-if-available eyr)
           :pid pid
           :hcl hcl
-          :hgt hgt
+          :hgt (parse-height hgt)
           :ecl (keyword ecl)
           :cid cid}))
 
@@ -48,18 +62,16 @@
 
 (s/def :passport/eye-colors #{:amb :blu :brn :gry :grn :hzl :oth})
 
-(defn valid-height? [s]
-  (if-let [[[_, num, unit]] (re-seq #"^(\d+)(cm|in)$" s)]
-    (let [num (Integer/parseInt num)]
-      (cond
-        (= unit "cm") (<= 150 num 193)
-        (= unit "in") (<= 59 num 76)))
-    false))
+(defn valid-height? [{:keys [num unit]}]
+  (case unit
+     :cm (<= 150 num 193)
+     :in (<= 59 num 76)
+     false))
 
 (s/def :passport/byr (s/int-in 1920 2003))
 (s/def :passport/iyr (s/int-in 2010 2021))
 (s/def :passport/eyr (s/int-in 2020 2031))
-(s/def :passport/hgt (s/and string? valid-height?))
+(s/def :passport/hgt (s/and some? valid-height?))
 (s/def :passport/hcl (s/and string? #(re-matches #"^#[a-f|0-9]{6}$" %)))
 (s/def :passport/ecl (s/and keyword? #(s/valid? :passport/eye-colors %)))
 (s/def :passport/pid (s/and string? #(re-matches #"^\d{9}$" %)))
