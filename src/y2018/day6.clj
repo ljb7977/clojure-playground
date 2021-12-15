@@ -19,12 +19,14 @@
   Output: 3"
   (+ (abs (- x2 x1)) (abs (- y2 y1))))
 
+(defn transpose [xs]
+  (apply map vector xs))
+
 (defn find-min-max-coords [coords]
   "좌표 리스트를 받아서 가장 바깥 x, y 좌표들을 구합니다.
   Input: [(1 2) (3 4) (100 3) (3 100)]
   Output: {:xmin 1 :ymin 2 :xmax 100 :ymax 100}"
-  (let [xs (map first coords)
-        ys (map second coords)]
+  (let [[xs ys] (transpose coords)]
     {:xmin (apply min xs)
      :ymin (apply min ys)
      :xmax (apply max xs)
