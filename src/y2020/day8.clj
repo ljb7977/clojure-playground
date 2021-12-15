@@ -31,7 +31,17 @@
       (if (op-visited? new-op-id)
         acc
         (recur new-acc new-op-id (conj op-visited? op-id))))))
-; -> lazy sequence를 반환하게 한다...?
+
+;reduce 버전
+(defn do-until-loop-detected
+  [ops]
+  (reduce (fn [{:keys [acc op-id op-visited?]} _]
+            (let [{new-acc :acc new-op-id :op-id} (next-step {:acc acc :op-id op-id :ops ops})]
+              (if (op-visited? new-op-id)
+                (reduced acc)
+                {:acc new-acc :op-id new-op-id :op-visited? (conj op-visited? op-id)})))
+          {:acc 0 :op-id 0 :op-visited? #{}}
+          (repeat nil)))
 
 (defn acc-after-program-terminates
   "
