@@ -101,21 +101,25 @@
     (loop-detected? state) nil
     (reached-end? state) acc))
 
+; :state -> #{:init :loop :term}
+; TODO: state까지 넣어서 구현
 (defn acc-after-program-terminates [ops]
-  (->>
-    (#(iterate next-step {:acc 0 :op-id 0 :ops ops :history #{}}))
-    (drop-while not-loop-detected-and-not-reached-end?)
-    first
-    get-acc-if-reached-end))
+  (let [initial-state {:acc 0 :op-id 0 :ops ops :history #{}}]
+    (->> initial-state
+      (iterate next-step)
+      (drop-while not-loop-detected-and-not-reached-end?)
+      first
+      get-acc-if-reached-end)))
 
 (comment
   ; Part 1
-  (->> input-val
-       (map parse)
-       (#(iterate next-step {:acc 0 :op-id 0 :ops % :history #{}}))
-       (drop-while (complement loop-detected?))
-       first
-       :acc)
+  (let [ops (mapv parse input-val)
+        initial-state {:acc 0 :op-id 0 :ops ops :history #{}}]
+    (->> initial-state
+         (iterate next-step)
+         (drop-while (complement loop-detected?))
+         first
+         :acc))
 
   ;Part 2
   (->> input-val
