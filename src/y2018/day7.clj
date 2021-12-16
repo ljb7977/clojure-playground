@@ -2,7 +2,7 @@
   (:require util))
 
 (def input-val
-  (util/read-lines "y2018/day7-example.txt"))
+  (util/read-lines "y2018/day7.txt"))
 
 (defn parse-one-line [s]
   (let [[[_ precond result]] (re-seq #"Step (.) must be finished before step (.) can begin\." s)]
@@ -29,17 +29,25 @@
        (map (fn [[k v]] [k (disj v value)]))
        (into {})))
 
-(defn process-one-step [{:keys [result graph]}]
-  (let [keys-with-empty-list (get-keys-where-value-is-empty-list graph)
-        min-key-with-empty-list (apply min-key compare keys-with-empty-list)]
-    (-> graph
-        (dissoc min-key-with-empty-list)
-        (remove-value-from-all-entry min-key-with-empty-list)
-        (#({:result (conj result min-key-with-empty-list) :graph %})))))
+(defn process-one-step [{:keys [result graph] :as all}]
+  (if
+    (empty? graph)
+    all
+    (let [keys-with-empty-list (get-keys-where-value-is-empty-list graph)
+          min-key-with-empty-list (apply min-key int keys-with-empty-list)]
+      (-> graph
+          (dissoc min-key-with-empty-list)
+          (remove-value-from-all-entry min-key-with-empty-list)
+          ((fn [g]
+             {:result (conj result min-key-with-empty-list) :graph g}))))))
+
+;(process-one-step {:result [], :graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}})
 
 (->> input-val
      (map parse-one-line)
      ->graph
      (#(iterate process-one-step {:result [] :graph %}))
-     (take 1))
-
+     (drop-while #(not (empty? (:graph %))))
+     first
+     :result
+     (apply str))
