@@ -45,7 +45,7 @@
   Output: {:result [{:guard-id 2081 :month 2 :day 7 :start-minute 1 :end-minute 10}]
            :curr {:guard-id 2081 :month 2 :day 7 :start-minute 1 :end-minute 10}}
   "
-  [{:keys [removed-keys curr]}
+  [{:keys [result curr]}
    {:keys [action month day minute guard-id]}]
   (let [updated-curr (cond
                        (not (nil? guard-id)) {:guard-id guard-id}
@@ -59,8 +59,8 @@
                                               :start-minute (curr :start-minute)
                                               :end-minute   minute})]
     (if (contains? updated-curr :end-minute)
-      {:removed-keys (conj removed-keys updated-curr) :curr updated-curr}
-      {:removed-keys removed-keys :curr updated-curr})))
+      {:result (conj result updated-curr) :curr updated-curr}
+      {:result result :curr updated-curr})))
 
 (defn collect-minutes
   "
@@ -103,8 +103,8 @@
   (->> input-val
        sort
        (map parse)
-       (reduce records->sleeping-ranges {:removed-keys [] :curr {}})
-       :removed-keys
+       (reduce records->sleeping-ranges {:result [] :curr {}})
+       :result
        (reduce collect-minutes {})
        (apply max-key #(count (second %)))
        (apply (fn [id minutes] (* id (find-most-frequent-one minutes)))))
@@ -114,8 +114,8 @@
   (->> input-val
        sort
        (map parse)
-       (reduce records->sleeping-ranges {:removed-keys [] :curr {}})
-       :removed-keys
+       (reduce records->sleeping-ranges {:result [] :curr {}})
+       :result
        (reduce collect-minutes {})
        (map get-frequencies)
        (apply max-key #(max-val-of-map (second %))) ; 명시적으로 바인딩을 더 잘 해주고 싶은데...
