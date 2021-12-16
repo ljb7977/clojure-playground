@@ -32,8 +32,18 @@
 
 (defn swap-jmp-and-nop-at
   "ops 벡터에서 idx 위치에 있는 instruction이 jmp면 nop로, nop면 jmp로 바꿔 줍니다.
-  Input: 2 [[:acc 10] [:acc -1] [:nop 10]]
-  Output: [[:acc 10] [:acc -1] [:jmp 10]]
+  Input: 2 [{:op :acc
+             :arg 10}
+            {:op :acc
+             :arg -1}
+            {:op :nop
+             :arg 10}]
+  Output: [{:op :acc
+            :arg 10}
+           {:op :acc
+            :arg -1}
+           {:op :jmp
+            :arg 10}]
   "
   [idx ops]
   (let [{:keys [op arg]} (nth ops idx)
@@ -44,8 +54,8 @@
 
 (defn get-indices-of-jmp-or-nop
   "ops 벡터에서 instruction이 jmp나 nop인 것들의 인덱스를 반환합니다.
-  Input: [[:acc 10] [:jmp -1] [:nop 10]]
-  Output: (1, 2)
+  Input: [{:op :acc :arg 10} {:op :jmp :arg -1} {:op :nop :arg 10}]
+  Output: (1 2)
   "
   [ops]
   (->> ops
@@ -55,16 +65,30 @@
 
 (defn generate-candidate-ops
   "ops 벡터에서 jmp<->nop를 한번만 뒤바꾼 모든 조합을 만들어냅니다.
-  Input: [[:acc 10] [:jmp -1] [:nop 10]]
-  Output: [[[:acc 10] [:nop -1] [:nop 10]] [[:acc 10] [:jmp -1] [:jmp 10]]]
+  Input: [{:op :acc :arg 10} {:op :jmp :arg -1} {:op :nop :arg 10}]
+  Output: [[{:op :acc :arg 10} {:op :nop :arg -1} {:op :nop :arg 10}]
+           [{:op :acc :arg 10} {:op :jmp :arg -1} {:op :jmp :arg 10}]]
   "
   [ops]
   (for [idx (get-indices-of-jmp-or-nop ops)] (swap-jmp-and-nop-at idx ops)))
 
-(defn loop-detected? [{:keys [op-id history]}]
+(defn loop-detected?
+  "루프가 발생했는지 여부를 반환합니다
+  Input: {:op-id 3 :history #{1 2 3}}
+  Output: true
+
+  Input: {:op-id 10 :history #{1 2 3}}
+  Output: false
+  "
+  [{:keys [op-id history]}]
   (contains? history op-id))
 
-(defn reached-end? [{:keys [op-id ops]}]
+(defn reached-end?
+  "프로그램이 마지막에 도달했는지 여부를 반환합니다.
+  Input: {:op-id 2 :ops [{:op :nop :arg 1} {:op :acc :arg 10}]}
+  Output: true
+  "
+  [{:keys [op-id ops]}]
   (>= op-id (count ops)))
 
 (defn not-loop-detected-and-not-reached-end? [state]
@@ -89,7 +113,7 @@
   (->> input-val
        (map parse)
        (#(iterate next-step {:acc 0 :op-id 0 :ops % :history #{}}))
-       (drop-while loop-detected?)
+       (drop-while (complement loop-detected?))
        first
        :acc)
 
