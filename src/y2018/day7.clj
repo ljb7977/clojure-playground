@@ -2,20 +2,33 @@
   (:require util))
 
 (def input-val
-  (util/read-lines "y2018/day7.txt"))
+  (util/read-lines "y2018/day7-example.txt"))
 
-(defn parse-one-line [s]
+(defn parse-one-line
+  "Input: Step C must be finished before step A can begin.
+  Output: {:precond C :result A}
+  "
+  [s]
   (let [[[_ precond result]] (re-seq #"Step (.) must be finished before step (.) can begin\." s)]
-    {:precond (first precond)
-     :result (first result)}))
+    {:precond      (first precond)
+     :removed-keys (first result)}))
 
-(defn ->graph [xs]
+(defn ->graph
+  "Input: [{:precond \\C, :result \\A}
+           {:precond \\C, :result \\F}
+           {:precond \\A, :result \\B}
+           {:precond \\A, :result \\D}
+           {:precond \\B, :result \\E}
+           {:precond \\D, :result \\E}
+           {:precond \\F, :result \\E}]
+  Output: {\\A #{\\C}, \\B #{\\A}, \\C #{}, \\D #{\\A}, \\E #{\\B \\D \\F}, \\F #{\\C}}"
+  [xs]
   (let [chars (->> xs
                   (map vals)
                   flatten
                   set)]
-    (reduce (fn [acc {:keys [precond result]}]
-              (update acc result #(conj % precond)))
+    (reduce (fn [acc {:keys [precond removed-keys]}]
+              (update acc removed-keys #(conj % precond)))
             (zipmap chars (repeat #{}))
             xs)))
 
@@ -24,27 +37,40 @@
        (map parse-one-line)
        ->graph))
 
-(defn get-keys-where-value-is-empty-list [m]
+(defn get-keys-where-value-is-empty
+  "empty value를 가진 key들을 모두 반환합니다.
+  Input: {A #{}, B #{C A}, C #{}}
+  Output: (A C)"
+  [m]
   (->> m
        (filter #(empty? (val %)))
        (map key)))
 
-(defn remove-value-from-all-entry [m value]
+(defn remove-value
+  "맵의 value인 set들에서 특정 value를 모두 제거합니다.
+  Input: {A #{C}, B #{C}, C #{}}, C
+  Output: {A #{}, B #{}, C #{}}
+  "
+  [m value]
   (->> m
        (map (fn [[k v]] [k (disj v value)]))
        (into {})))
 
-(defn process-one-step [{:keys [result graph] :as all}]
+(defn process-one-step
+  "Input: {:result [] :graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}}
+  Output: {:result [C] :graph {A #{}, B {#A}, D #{A}, E #{B D F}, F #{}}}
+  "
+  [{:keys [removed-keys graph] :as all}]
   (if
     (empty? graph)
     all
-    (let [keys-with-empty-list (get-keys-where-value-is-empty-list graph)
-          min-key-with-empty-list (apply min-key int keys-with-empty-list)]
-      (-> graph
-          (dissoc min-key-with-empty-list)
-          (remove-value-from-all-entry min-key-with-empty-list)
-          ((fn [g]
-             {:result (conj result min-key-with-empty-list) :graph g}))))))
+    (let [key-to-remove (->> graph
+                             get-keys-where-value-is-empty
+                             (apply min-key int))]
+      {:removed-keys (conj removed-keys key-to-remove)
+       :graph        (-> graph
+                         (dissoc key-to-remove)
+                         (remove-value key-to-remove))})))
 
 ;(process-one-step {:result [], :graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}})
 
@@ -84,14 +110,14 @@
 ;          ((fn [g]
 ;             {:result (conj result min-key-with-empty-list) :graph g}))))))
 
-(defn get-result-as-string [{result :result}]
+(defn get-result-as-string [{result :removed-keys}]
   (apply str result))
 
 (comment
   ; Part 1
   (->> input-val
        parse
-       (#(iterate process-one-step {:result [] :graph %}))
+       (#(iterate process-one-step {:removed-keys [] :graph %}))
        (drop-while #(not (empty? (:graph %))))
        first
        get-result-as-string))
