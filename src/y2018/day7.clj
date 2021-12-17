@@ -10,8 +10,8 @@
   "
   [s]
   (let [[[_ precond result]] (re-seq #"Step (.) must be finished before step (.) can begin\." s)]
-    {:precond      (first precond)
-     :result (first result)}))
+    {:precond (first precond)
+     :result  (first result)}))
 
 (defn ->graph
   "Input: [{:precond C, :result A}
@@ -86,8 +86,8 @@
   Output: ({:job A :remaining 4} {:job B :remaining 0})"
   [workers]
   (map (fn [{:keys [job remaining]}]
-           {:job       job
-            :remaining (dec remaining)}) workers))
+         {:job       job
+          :remaining (dec remaining)}) workers))
 
 ; 2. 끝난 워커가 있으면, 그 job을 회수한다.
 (defn reap-finished-job
@@ -96,9 +96,9 @@
            :finished-jobs [A]}"
   [workers]
   (let [{finished-workers true
-         ongoing-workers false} (group-by #(= 0 (:remaining %)) workers)]
+         ongoing-workers  false} (group-by #(= 0 (:remaining %)) workers)]
     {:finished-jobs (map :job finished-workers)
-     :workers ongoing-workers}))
+     :workers       ongoing-workers}))
 
 (defn get-duration-of-job
   "알파벳 job이 들어오면 그 job을 완료하는데 걸리는 시간을 구합니다.
@@ -155,17 +155,17 @@
            :workers ({:job F, :remaining 66} {:job A, :remaining 61})
            :result (C)}"
   [{:keys [graph workers result]}]
-  (let [{finished-jobs :finished-jobs
+  (let [{finished-jobs         :finished-jobs
          workers-after-reaping :workers} (->> workers
                                               process-workers
                                               reap-finished-job)
         new-graph (as-> graph v
-                      (apply dissoc v finished-jobs)
-                      (remove-values v finished-jobs))
+                        (apply dissoc v finished-jobs)
+                        (remove-values v finished-jobs))
         new-workers (assign-jobs-to-workers workers-after-reaping new-graph)]
-    {:graph new-graph
+    {:graph   new-graph
      :workers new-workers
-     :result (concat result finished-jobs)}))
+     :result  (concat result finished-jobs)}))
 
 ;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
 ;                            :workers []
