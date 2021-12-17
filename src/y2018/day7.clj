@@ -121,7 +121,7 @@
     (reduce (fn [acc val]
               (cond
                 (= (count acc) max-workers) (reduced acc)
-                (contains? acc val) acc ; already working?
+                (contains? acc val) acc                     ; already working?
                 :else (assoc acc val (get-duration-of-job val duration-offset))))
             workers
             assignable-jobs)))
@@ -147,23 +147,24 @@
            :max-workers 5
            :duration-offset 61
            :elasped-time 1}"
-  [{:keys [graph workers result max-workers duration-offset elapsed-time]}]
-  (let [{finished-jobs         :finished-jobs
-         workers-after-reaping :workers} (->> workers
-                                              process-workers-one-step
-                                              reap-finished-job)
-        new-graph (remove-jobs-from-graph graph finished-jobs)
-        new-workers (assign-jobs-to-workers workers-after-reaping new-graph max-workers duration-offset)]
-    {:graph           new-graph
-     :workers         new-workers
-     :result          (concat result finished-jobs)
-     :max-workers     max-workers
-     :duration-offset duration-offset
-     :elapsed-time    (inc elapsed-time)}))
+  [{:keys [graph workers max-workers duration-offset] :as state}]
+  (let [{finished-jobs :finished-jobs
+         workers'      :workers}
+        (-> workers
+            (assign-jobs-to-workers graph max-workers duration-offset)
+            process-workers-one-step
+            reap-finished-job)]
+    (-> state
+        (assoc :workers workers')
+        (update :graph #(remove-jobs-from-graph % finished-jobs))
+        (update :elapsed-time inc)
+        (update :result #(concat % finished-jobs)))))
 ;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
 ;                            :workers {}
 ;                            :result []
-;                            :max-workers 5})
+;                            :max-workers 5
+;                            :duration-offset 61
+;                            :elapsed-time 0})
 
 (defn get-result-as-string [{result :removed-keys}]
   (apply str result))
@@ -185,6 +186,6 @@
                        :elapsed-time    0}]
     (->> initial-state
          (iterate process-step-with-workers)
-         (take-while #(or (seq (:workers %)) (seq (:graph %))))
-         last
+         (drop-while #(or (seq (:workers %)) (seq (:graph %))))
+         first
          :elapsed-time)))
