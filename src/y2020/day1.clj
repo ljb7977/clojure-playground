@@ -1,37 +1,26 @@
 (ns y2020.day1
-  (:require util))
+  (:require util
+            [clojure.math.combinatorics :as combo]))
 
 (def input-val
   (util/read-lines "y2020/day1.txt"))
 
-(defn permute-2 [xs]
-  (for [x xs, y xs] [x y]))
-
-(defn permute-3 [xs]
-  (for [x xs,
-        y xs,
-        z xs]
-    [x y z]))
-
-(defn sum-and-multiply [[x y]]
-  [(+ x y) (* x y)])
-
-(defn sum-is-not-2020? [xs]
-  (not (= 2020 (apply + xs))))
+(defn combo-n [n xs]
+  (combo/combinations xs n))
 
 (comment
   ; Part 1
   (->> input-val
        (map #(Integer/parseInt %))
-       permute-2
-       (drop-while sum-is-not-2020?)
+       (combo-n 2)
+       (filter #(= 2020 (apply + %)))
        first
        (apply *))
 
   ; Part 2
   (->> input-val
        (map #(Integer/parseInt %))
-       permute-3
-       (drop-while sum-is-not-2020?)
+       (combo-n 3)
+       (filter #(= 2020 (apply + %)))
        first
        (apply *)))
