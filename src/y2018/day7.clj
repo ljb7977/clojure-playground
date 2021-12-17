@@ -107,34 +107,25 @@
 
 (defn get-duration-of-job
   "알파벳 job이 들어오면 그 job을 완료하는데 걸리는 시간을 구합니다.
-  즉, A -> 61, B -> 62, ..., Z -> 86"
-  [job]
-  (+ 61 (- (int job) (int \A))))
-
-(defn assign-job-to-workers
-  "worker 리스트에 새로운 job을 추가합니다.
-  Input: {A 10, B 1}, Z
-  Output: {Z 86, A 10, B 1}
-  "
-  [workers job]
-  (assoc workers job (get-duration-of-job job)))
-;(assign-job-to-workers {\A 10 \B 1} \Z)
+  Input: A 61
+  Output: 61"
+  [job offset]
+  (+ offset (- (int job) (int \A))))
 
 (defn assign-jobs-to-workers
   "현재 graph에서 처리할 수 있는 job들을 최대한 worker에 할당합니다."
-  [workers graph num-workers]
+  [workers graph max-workers duration-offset]
   (let [assignable-jobs (->> graph
                              get-keys-where-value-is-empty
-                             (sort compare))
-        already-working? contains?]
+                             (sort compare))]
     (reduce (fn [acc val]
               (cond
-                (= (count acc) num-workers) (reduced acc)
-                (already-working? acc val) acc
-                :else (assign-job-to-workers acc val)))
+                (= (count acc) max-workers) (reduced acc)
+                (contains? acc val) acc ; already working?
+                :else (assoc acc val (get-duration-of-job val duration-offset))))
             workers
             assignable-jobs)))
-(assign-jobs-to-workers {} {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}} 5)
+(assign-jobs-to-workers {} {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}} 5 61)
 
 ; 3. 처리 완료된 알파벳들을 result 리스트에 추가한다.
 ; 4. 그래프에서 그 알파벳들을 제거한다.
@@ -147,34 +138,32 @@
   Input: {:graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}
           :workers {C 1}
           :result ()
-          :num-workers 5
+          :max-workers 5
+          :duration-offset 61
           :elapsed-time 0}
   Output: {:graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}
            :workers {F 66, A 61}
            :result (C)
-           :num-workers 5
+           :max-workers 5
+           :duration-offset 61
            :elasped-time 1}"
-  [{:keys [graph workers result num-workers elapsed-time]}]
+  [{:keys [graph workers result max-workers duration-offset elapsed-time]}]
   (let [{finished-jobs         :finished-jobs
          workers-after-reaping :workers} (->> workers
                                               process-workers-one-step
                                               reap-finished-job)
         new-graph (remove-jobs-from-graph graph finished-jobs)
-        new-workers (assign-jobs-to-workers workers-after-reaping new-graph num-workers)]
-    {:graph   new-graph
-     :workers new-workers
-     :result  (concat result finished-jobs)
-     :num-workers num-workers
-     :elapsed-time (inc elapsed-time)}))
+        new-workers (assign-jobs-to-workers workers-after-reaping new-graph max-workers duration-offset)]
+    {:graph           new-graph
+     :workers         new-workers
+     :result          (concat result finished-jobs)
+     :max-workers     max-workers
+     :duration-offset duration-offset
+     :elapsed-time    (inc elapsed-time)}))
 ;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
 ;                            :workers {}
 ;                            :result []
-;                            :num-workers 5})
-; working-plan
-; work-dependencies
-; directed graph -> 인접 리스트
-;                            :workers {}
-;                            :result []})
+;                            :max-workers 5})
 
 (defn get-result-as-string [{result :removed-keys}]
   (apply str result))
@@ -188,11 +177,12 @@
        first
        get-result-as-string)
   ; Part 2
-  (let [initial-state {:graph (parse input-val)
-                       :workers {}
-                       :result []
-                       :num-workers 5
-                       :elapsed-time 0}]
+  (let [initial-state {:graph           (parse input-val)
+                       :workers         {}
+                       :result          []
+                       :max-workers     5
+                       :duration-offset 61
+                       :elapsed-time    0}]
     (->> initial-state
          (iterate process-step-with-workers)
          (take-while #(or (seq (:workers %)) (seq (:graph %))))
