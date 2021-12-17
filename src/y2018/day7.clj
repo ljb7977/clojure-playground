@@ -37,15 +37,14 @@
        (map parse-one-line)
        ->graph))
 
-; TODO: keep + when을 활용해서!
 (defn get-keys-where-value-is-empty
   "empty value를 가진 key들을 모두 반환합니다.
   Input: {A #{}, B #{C A}, C #{}}
   Output: (A C)"
   [m]
-  (->> m
-       (filter #(empty? (val %)))
-       (map key)))
+  (keep (fn [[k v]]
+          (when (empty? v) k))
+        m))
 
 (defn remove-values
   "맵의 value인 set들에서 특정 value들을 모두 제거합니다.
@@ -189,13 +188,13 @@
        first
        get-result-as-string)
   ; Part 2
-  (->> input-val
-       parse
-       (#(iterate process-step-with-workers {:graph %
-                                             :workers {}
-                                             :result []
-                                             :num-workers 5
-                                             :elapsed-time 0}))
-       (take-while #(or (seq (:workers %)) (seq (:graph %))))
-       last
-       :elapsed-time))
+  (let [initial-state {:graph (parse input-val)
+                       :workers {}
+                       :result []
+                       :num-workers 5
+                       :elapsed-time 0}]
+    (->> initial-state
+         (iterate process-step-with-workers)
+         (take-while #(or (seq (:workers %)) (seq (:graph %))))
+         last
+         :elapsed-time)))
