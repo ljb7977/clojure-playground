@@ -37,6 +37,7 @@
        (map parse-one-line)
        ->graph))
 
+; TODO: keep + when을 활용해서!
 (defn get-keys-where-value-is-empty
   "empty value를 가진 key들을 모두 반환합니다.
   Input: {A #{}, B #{C A}, C #{}}
@@ -48,7 +49,7 @@
 
 (defn remove-values
   "맵의 value인 set들에서 특정 value들을 모두 제거합니다.
-  Input: {A #{C}, B #{C}, C #{}}, C
+  Input: {A #{B C}, B #{C}, C #{}}, [B C]
   Output: {A #{}, B #{}, C #{}}
   "
   [m values]
@@ -74,8 +75,7 @@
   Output: {:removed-keys [C] :graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}}
   "
   [{:keys [removed-keys graph] :as all}]
-  (if
-    (empty? graph)
+  (if (empty? graph)
     all
     (let [key-to-remove (->> graph
                              get-keys-where-value-is-empty
@@ -88,7 +88,6 @@
 ; 1. 모든 워커들에 대해 1초식 진행시켜준다.
 ; workers: 알파벳 -> 남은 시간의 map
 ; == (fmap dec workers)
-; map comprehension이 있다면 더 좋겠군요...
 (defn process-workers-one-step
   "Input: {A 5, B 1}
   Output: {A 4, B 0}"
@@ -122,29 +121,23 @@
   (assoc workers job (get-duration-of-job job)))
 ;(assign-job-to-workers {\A 10 \B 1} \Z)
 
-(defn job-already-working?
-  "주어진 job이 이미 처리되고 있는지 확인합니다
-  Input: {A 10, B 1}, A
-  Output: true
-  "
-  [workers job]
-  (contains? workers job))
-
 (defn assign-jobs-to-workers
   "현재 graph에서 처리할 수 있는 job들을 최대한 worker에 할당합니다."
-  [workers graph]
+  [workers graph num-workers]
   (let [assignable-jobs (->> graph
                              get-keys-where-value-is-empty
-                             (sort compare))]
+                             (sort compare))
+        already-working? contains?]
     (reduce (fn [acc val]
               (cond
-                (= (count acc) 5) (reduced acc)
-                (job-already-working? acc val) acc
+                (= (count acc) num-workers) (reduced acc)
+                (already-working? acc val) acc
                 :else (assign-job-to-workers acc val)))
             workers
             assignable-jobs)))
+(assign-jobs-to-workers {} {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}} 5)
 
-; 3. 처리 완료된 알파벳들을 done 리스트에 추가한다.
+; 3. 처리 완료된 알파벳들을 result 리스트에 추가한다.
 ; 4. 그래프에서 그 알파벳들을 제거한다.
 ; 5. 넣을 수 있는 만큼 새 알파벳을 워커에 넣는다.
 (defn process-step-with-workers
@@ -154,21 +147,33 @@
   그 다음엔 새 그래프에서 이제 처리할 수 있는 job들을 최대한 워커에 할당하고, 여기까지의 모든 새 state를 반환합니다.
   Input: {:graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}
           :workers {C 1}
-          :result ()}
+          :result ()
+          :num-workers 5
+          :elapsed-time 0}
   Output: {:graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}
            :workers {F 66, A 61}
-           :result (C)}"
-  [{:keys [graph workers result]}]
+           :result (C)
+           :num-workers 5
+           :elasped-time 1}"
+  [{:keys [graph workers result num-workers elapsed-time]}]
   (let [{finished-jobs         :finished-jobs
          workers-after-reaping :workers} (->> workers
                                               process-workers-one-step
                                               reap-finished-job)
         new-graph (remove-jobs-from-graph graph finished-jobs)
-        new-workers (assign-jobs-to-workers workers-after-reaping new-graph)]
+        new-workers (assign-jobs-to-workers workers-after-reaping new-graph num-workers)]
     {:graph   new-graph
      :workers new-workers
-     :result  (concat result finished-jobs)}))
+     :result  (concat result finished-jobs)
+     :num-workers num-workers
+     :elapsed-time (inc elapsed-time)}))
 ;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
+;                            :workers {}
+;                            :result []
+;                            :num-workers 5})
+; working-plan
+; work-dependencies
+; directed graph -> 인접 리스트
 ;                            :workers {}
 ;                            :result []})
 
@@ -180,13 +185,17 @@
   (->> input-val
        parse
        (#(iterate process-one-step {:removed-keys [] :graph %}))
-       (drop-while #(not (empty? (:graph %))))
+       (drop-while #(seq (:graph %)))
        first
        get-result-as-string)
   ; Part 2
   (->> input-val
        parse
-       (#(iterate process-step-with-workers {:graph % :workers {} :result []}))
-       (drop 1)
+       (#(iterate process-step-with-workers {:graph %
+                                             :workers {}
+                                             :result []
+                                             :num-workers 5
+                                             :elapsed-time 0}))
        (take-while #(or (seq (:workers %)) (seq (:graph %))))
-       count))
+       last
+       :elapsed-time))
