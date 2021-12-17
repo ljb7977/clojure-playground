@@ -80,25 +80,26 @@
 
 ; 로직:
 ; 1. 모든 워커들에 대해 1초식 진행시켜준다.
-;worker: {:job \A :remaining 5}
-(defn process-workers
-  "Input: ({:job A :remaining 5} {:job B :remaining 1})
-  Output: ({:job A :remaining 4} {:job B :remaining 0})"
+;workers: 알파벳 -> 남은 시간의 map
+; == (fmap dec workers)
+; map comprehension이 있다면 더 좋겠군요...
+(defn process-workers-one-step
+  "Input: {A 5, B 1}
+  Output: {A 4, B 0}"
   [workers]
-  (map (fn [{:keys [job remaining]}]
-           {:job       job
-            :remaining (dec remaining)}) workers))
+  (->> workers
+       (map (fn [[job remaining]] [job (dec remaining)]))
+       (into {})))
 
 ; 2. 끝난 워커가 있으면, 그 job을 회수한다.
 (defn reap-finished-job
-  "Input: [{:job A :remaining 0} {:job B :remaining 1}]
-  Output: {:workers [{:job B :remaining 1}]
-           :finished-jobs [A]}"
+  "Input: {A 0, B 1}
+  Output: {:workers {B 1} :finished-jobs (A)}"
   [workers]
   (let [{finished-workers true
-         ongoing-workers false} (group-by #(= 0 (:remaining %)) workers)]
-    {:finished-jobs (map :job finished-workers)
-     :workers ongoing-workers}))
+         ongoing-workers false} (group-by #(= 0 (val %)) workers)]
+    {:finished-jobs (keys finished-workers)
+     :workers (into {} ongoing-workers)}))
 
 (defn get-duration-of-job
   "알파벳 job이 들어오면 그 job을 완료하는데 걸리는 시간을 구합니다.
@@ -108,23 +109,20 @@
 
 (defn assign-job-to-workers
   "worker 리스트에 새로운 job을 추가합니다.
-  Input: ({:job A :remaining 10} {:job B :remaining 1}), Z
-  Output: ({:job Z :remaining 86} {:job A :remaining 10} {:job B :remaining 1})
+  Input: {A 10, B 1}, Z
+  Output: {Z 86, A 10, B 1}
   "
   [workers job]
-  (conj workers {:job job :remaining (get-duration-of-job job)}))
-;(add-job-to-workers '({:job \A :remaining 10} {:job \B :remaining 1}) \Z)
+  (assoc workers job (get-duration-of-job job)))
+;(assign-job-to-workers {\A 10 \B 1} \Z)
 
 (defn job-already-working?
   "주어진 job이 이미 처리되고 있는지 확인합니다
-  Input: ({:job A :remaining 10} {:job B :remaining 1}), A
+  Input: {A 10, B 1}, A
   Output: true
   "
   [workers job]
-  (->> workers
-       (map :job)
-       set
-       (#(contains? % job))))
+  (contains? workers job))
 
 (defn assign-jobs-to-workers
   "현재 graph에서 처리할 수 있는 job들을 최대한 worker에 할당합니다."
@@ -149,15 +147,15 @@
   그리고 수거한 job에 해당하는 알파벳들을 그래프에서 제거해 줍니다.
   그 다음엔 새 그래프에서 이제 처리할 수 있는 job들을 최대한 워커에 할당하고, 여기까지의 모든 새 state를 반환합니다.
   Input: {:graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}
-          :workers ({:job C, :remaining 1})
+          :workers {C 1}
           :result ()}
   Output: {:graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}
-           :workers ({:job F, :remaining 66} {:job A, :remaining 61})
+           :workers {F 66, A 61}
            :result (C)}"
   [{:keys [graph workers result]}]
   (let [{finished-jobs :finished-jobs
          workers-after-reaping :workers} (->> workers
-                                              process-workers
+                                              process-workers-one-step
                                               reap-finished-job)
         new-graph (as-> graph v
                       (apply dissoc v finished-jobs)
@@ -166,9 +164,8 @@
     {:graph new-graph
      :workers new-workers
      :result (concat result finished-jobs)}))
-
 ;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
-;                            :workers []
+;                            :workers {}
 ;                            :result []})
 
 (defn get-result-as-string [{result :removed-keys}]
@@ -185,7 +182,7 @@
   ; Part 2
   (->> input-val
        parse
-       (#(iterate process-step-with-workers {:graph % :workers [] :result []}))
+       (#(iterate process-step-with-workers {:graph % :workers {} :result []}))
        (drop 1)
        (take-while #(or (seq (:workers %)) (seq (:graph %))))
        count))
