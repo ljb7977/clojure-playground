@@ -11,7 +11,7 @@
   [s]
   (let [[[_ precond result]] (re-seq #"Step (.) must be finished before step (.) can begin\." s)]
     {:precond      (first precond)
-     :removed-keys (first result)}))
+     :result (first result)}))
 
 (defn ->graph
   "Input: [{:precond C, :result A}
@@ -27,8 +27,8 @@
                    (map vals)
                    flatten
                    set)]
-    (reduce (fn [acc {:keys [precond removed-keys]}]
-              (update acc removed-keys #(conj % precond)))
+    (reduce (fn [acc {:keys [precond result]}]
+              (update acc result #(conj % precond)))
             (zipmap chars (repeat #{}))
             xs)))
 
