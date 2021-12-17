@@ -61,8 +61,8 @@
   (remove-values m [value]))
 
 (defn process-one-step
-  "Input: {:result [] :graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}}
-  Output: {:result [C] :graph {A #{}, B {#A}, D #{A}, E #{B D F}, F #{}}}
+  "Input: {:removed-keys [] :graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}}
+  Output: {:removed-keys [C] :graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}}
   "
   [{:keys [removed-keys graph] :as all}]
   (if
