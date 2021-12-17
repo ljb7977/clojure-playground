@@ -2,7 +2,7 @@
   (:require util))
 
 (def input-val
-  (util/read-lines "y2018/day7-example.txt"))
+  (util/read-lines "y2018/day7.txt"))
 
 (defn parse-one-line
   "Input: Step C must be finished before step A can begin.
@@ -11,7 +11,7 @@
   [s]
   (let [[[_ precond result]] (re-seq #"Step (.) must be finished before step (.) can begin\." s)]
     {:precond      (first precond)
-     :removed-keys (first result)}))
+     :result (first result)}))
 
 (defn ->graph
   "Input: [{:precond C, :result A}
@@ -25,10 +25,10 @@
   [xs]
   (let [chars (->> xs
                    (map vals)
-                   flatten
+                   (apply concat)
                    set)]
-    (reduce (fn [acc {:keys [precond removed-keys]}]
-              (update acc removed-keys #(conj % precond)))
+    (reduce (fn [acc {:keys [precond result]}]
+              (update acc result #(conj % precond)))
             (zipmap chars (repeat #{}))
             xs)))
 
@@ -56,13 +56,22 @@
        (map (fn [[k v]] [k (apply disj v values)]))
        (into {})))
 
-(defn remove-value
-  [m value]
-  (remove-values m [value]))
+(defn remove-jobs-from-graph
+  "주어진 graph에서 jobs로 주어지는 모든 알파벳을 제거합니다.
+  Input: {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}, [C]
+  Output: {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}
+
+  Input: {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}, [A C]
+  Output: {B #{}, D #{}, E #{B D F}, F #{}}
+  "
+  [graph jobs]
+  (as-> graph m
+        (apply dissoc m jobs)
+        (remove-values m jobs)))
 
 (defn process-one-step
-  "Input: {:result [] :graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}}
-  Output: {:result [C] :graph {A #{}, B {#A}, D #{A}, E #{B D F}, F #{}}}
+  "Input: {:removed-keys [] :graph {A #{C}, B #{A}, C #{}, D #{A}, E #{B D F}, F #{C}}}
+  Output: {:removed-keys [C] :graph {A #{}, B #{A}, D #{A}, E #{B D F}, F #{}}}
   "
   [{:keys [removed-keys graph] :as all}]
   (if
@@ -72,15 +81,12 @@
                              get-keys-where-value-is-empty
                              (apply min-key int))]
       {:removed-keys (conj removed-keys key-to-remove)
-       :graph        (-> graph
-                         (dissoc key-to-remove)
-                         (remove-value key-to-remove))})))
-
+       :graph  (remove-jobs-from-graph graph [key-to-remove])})))
 ;(process-one-step {:result [], :graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}})
 
 ; 로직:
 ; 1. 모든 워커들에 대해 1초식 진행시켜준다.
-;workers: 알파벳 -> 남은 시간의 map
+; workers: 알파벳 -> 남은 시간의 map
 ; == (fmap dec workers)
 ; map comprehension이 있다면 더 좋겠군요...
 (defn process-workers-one-step
@@ -157,9 +163,7 @@
          workers-after-reaping :workers} (->> workers
                                               process-workers-one-step
                                               reap-finished-job)
-        new-graph (as-> graph v
-                      (apply dissoc v finished-jobs)
-                      (remove-values v finished-jobs))
+        new-graph (remove-jobs-from-graph graph finished-jobs)
         new-workers (assign-jobs-to-workers workers-after-reaping new-graph)]
     {:graph new-graph
      :workers new-workers
