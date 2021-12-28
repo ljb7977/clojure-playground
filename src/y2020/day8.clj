@@ -9,26 +9,43 @@
     {:op (keyword op)
      :arg (Integer/parseInt num)}))
 
-(defn next-step
-  "State machine을 한 step 계산한 결과를 돌려줍니다.
+(defn update-status
+  "이 state machine의 :status를 다음 규칙에 맞게 업데이트합니다
+  loop에 빠졌으면 -> :loop
+  마지막 operation에 도달했으면 -> :terminated
+  그 외의 경우 -> 이전 status 보존
+  "
+  [{:keys [op-id history ops] :as state}]
+  (cond
+    (contains? history op-id) (assoc state :status :loop)
+    (>= op-id (count ops)) (assoc state :status :terminated)
+    :else state))
+
+(defn apply-operation
+  "
   Input: {:acc 0 :op-id 0 :ops [{:op :acc :arg 10} {:op :jmp :arg -1}] :history #{}}
   Output: {:acc 10 :op-id 1 :ops [{:op :acc :arg 10} {:op :jmp :arg -1}] :history #{0}}
   "
-  [{:keys [acc op-id ops history]}]
+  [{:keys [acc op-id ops history] :as state}]
   (let [{:keys [op arg]} (nth ops op-id)]
     (case op
-      :acc {:acc (+ acc arg)
-            :op-id (inc op-id)
-            :ops ops
-            :history (conj history op-id)}
-      :nop {:acc acc
-            :op-id (inc op-id)
-            :ops ops
-            :history (conj history op-id)}
-      :jmp {:acc acc
-            :op-id (+ op-id arg)
-            :ops ops
-            :history (conj history op-id)})))
+      :acc (-> state
+               (assoc :acc (+ acc arg))
+               (assoc :op-id (inc op-id))
+               (assoc :history (conj history op-id)))
+      :nop (-> state
+               (assoc :op-id (inc op-id))
+               (assoc :history (conj history op-id)))
+      :jmp (-> state
+               (assoc :op-id (+ op-id arg))
+               (assoc :history (conj history op-id))))))
+
+(defn next-step
+  "State machine을 한 step 진행시킨 결과를 돌려줍니다."
+  [state]
+  (-> state
+      apply-operation
+      update-status))
 
 (defn swap-jmp-and-nop-at
   "ops 벡터에서 idx 위치에 있는 instruction이 jmp면 nop로, nop면 jmp로 바꿔 줍니다.
@@ -72,58 +89,39 @@
   [ops]
   (for [idx (get-indices-of-jmp-or-nop ops)] (swap-jmp-and-nop-at idx ops)))
 
-(defn loop-detected?
-  "루프가 발생했는지 여부를 반환합니다
-  Input: {:op-id 3 :history #{1 2 3}}
-  Output: true
-
-  Input: {:op-id 10 :history #{1 2 3}}
-  Output: false
-  "
-  [{:keys [op-id history]}]
-  (contains? history op-id))
-
-(defn reached-end?
-  "프로그램이 마지막에 도달했는지 여부를 반환합니다.
-  Input: {:op-id 2 :ops [{:op :nop :arg 1} {:op :acc :arg 10}]}
-  Output: true
-  "
-  [{:keys [op-id ops]}]
-  (>= op-id (count ops)))
-
-(defn not-loop-detected-and-not-reached-end? [state]
-  (and
-    (not (loop-detected? state))
-    (not (reached-end? state))))
-
-(defn get-acc-if-reached-end [{:keys [acc op-id ops history] :as state}]
+(defn get-acc-if-reached-end [{:keys [acc status]}]
   (cond
-    (loop-detected? state) nil
-    (reached-end? state) acc))
+    (= status :terminated) acc
+    (= status :loop) nil))
 
-; :state -> #{:init :loop :term}
-; TODO: state까지 넣어서 구현
+(defn initialize [ops]
+  {:acc 0
+   :op-id 0
+   :ops ops
+   :history #{}
+   :status :running}) ; :status의 도메인: #{:running :loop :terminated}
+
 (defn acc-after-program-terminates [ops]
-  (let [initial-state {:acc 0 :op-id 0 :ops ops :history #{}}]
-    (->> initial-state
-      (iterate next-step)
-      (drop-while not-loop-detected-and-not-reached-end?)
-      first
-      get-acc-if-reached-end)))
+  (->> ops
+       initialize
+       (iterate next-step)
+       (drop-while (fn [{status :status}] (and (not= status :loop) (not= status :terminated))))
+       first
+       get-acc-if-reached-end))
 
 (comment
   ; Part 1
-  (let [ops (mapv parse input-val)
-        initial-state {:acc 0 :op-id 0 :ops ops :history #{}}]
-    (->> initial-state
-         (iterate next-step)
-         (drop-while (complement loop-detected?))
-         first
-         :acc))
+  (->> input-val
+       (mapv parse)
+       initialize
+       (iterate next-step)
+       (drop-while #(not= (:status %) :loop))
+       first
+       :acc); 2080
 
   ;Part 2
   (->> input-val
        (mapv parse)
        generate-candidate-ops
        (keep acc-after-program-terminates)
-       first))
+       first)) ; 2477

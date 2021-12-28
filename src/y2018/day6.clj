@@ -92,9 +92,7 @@
                                           (filter (fn [{:keys [point closest-target-id]}]
                                                     (= 1 (count closest-target-id))))
                                           (map #(update % :closest-target-id first)))
-        points-at-border (->> point-and-its-closest-target
-                              (filter (fn [{:keys [point]}]
-                                        (point-at-border? point border))))
+        points-at-border (filter (fn [{:keys [point]}] (point-at-border? point border)) point-and-its-closest-target)
         target-ids-which-grow-infinitely (->> points-at-border
                                               (map :closest-target-id)
                                               set)]

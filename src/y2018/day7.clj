@@ -42,9 +42,7 @@
   Input: {A #{}, B #{C A}, C #{}}
   Output: (A C)"
   [m]
-  (keep (fn [[k v]]
-          (when (empty? v) k))
-        m))
+  (keep (fn [[k v]] (when (empty? v) k)) m))
 
 (defn remove-values
   "맵의 value인 set들에서 특정 value들을 모두 제거합니다.
@@ -100,9 +98,7 @@
   "Input: {A 5, B 1}
   Output: {A 4, B 0}"
   [workers]
-  (->> workers
-       (map (fn [[job remaining]] [job (dec remaining)]))
-       (into {})))
+  (reduce-kv (fn [m job remaining] (assoc m job (dec remaining))) {} workers))
 
 ; 3. 끝난 워커가 있으면, 그 job을 회수한다.
 (defn reap-finished-job
@@ -168,6 +164,7 @@
 
 (comment
   ; Part 1
+  ; Answer: EPWCFXKISTZVJHDGNABLQYMORU
   (->> input-val
        parse
        (init {:max-workers 1 :duration-offset 1})
@@ -176,6 +173,7 @@
        first
        get-result-as-string)
   ; Part 2
+  ; Answer: 952
   (->> input-val
        parse
        (init {:max-workers 5 :duration-offset 61})
