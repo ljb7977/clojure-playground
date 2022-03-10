@@ -5,9 +5,10 @@
 
 
 ; -------- Part 1 ----------
-(->> input-val
-     (map #(Integer/parseInt %))
-     (apply +))
+(comment
+  (->> input-val
+       (map #(Integer/parseInt %))
+       (apply +)))
 
 ; -------- Part 2 ----------
 ; version 1

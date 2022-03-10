@@ -35,11 +35,12 @@
   [xs]
   (for [a xs, b xs] [a b]))
 
-(defn get-hamming-distance [f g]
+(defn get-hamming-distance
   "두 string f, g간의 해밍 거리를 구합니다.
-  Example: asdf, asff -> 1
-           abcde, abdcb -> 2
-  "
+   Example: asdf, asff -> 1
+            abcde, abdcb -> 2
+   "
+  [f g]
   (reduce (fn [distance, [f1 g1]]
             (if (= f1 g1) distance (inc distance)))
           0
