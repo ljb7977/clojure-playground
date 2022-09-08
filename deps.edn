@@ -1,5 +1,6 @@
 {:deps {org.clojure/math.combinatorics {:mvn/version "0.1.6"}
         org.clojure/algo.monads {:mvn/version "0.1.6"}
-        failjure/failjure {:mvn/version "2.2.0"}}
+        failjure/failjure {:mvn/version "2.2.0"}
+        uncomplicate/fluokitten {:mvn/version "0.9.1"}}
  :paths ["src"
          "resources"]}
