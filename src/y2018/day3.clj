@@ -36,7 +36,7 @@
        (re-seq pattern)
        first
        rest
-       (map #(Integer/parseInt %))
+       (map parse-long)
        input-list->map))
 
 ; Test parse function

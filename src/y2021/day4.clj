@@ -13,7 +13,7 @@
 (defn parse-board [lines]
   (mapv (fn [line] (->> (split line #" ")
                         (filter (complement empty?))
-                        (mapv #(Integer/parseInt %))))
+                        (mapv parse-long)))
         lines))
 
 (defn parse-boards [lines]
@@ -28,7 +28,7 @@
 
 (defn parse-input [lines]
   (let [first-line (split (first lines) #",")
-        drawing-numbers (map #(Integer/parseInt %) first-line)
+        drawing-numbers (map parse-long first-line)
         rest-lines (rest lines)]
     (parse-boards rest-lines)))
 

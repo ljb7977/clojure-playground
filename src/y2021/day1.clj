@@ -6,7 +6,7 @@
 
 ; ------- Part 1 -------
 (->> input-val
-     (map #(Integer/parseInt %))
+     (map parse-long)
      (reduce (fn [{last :last acc :acc} val]
                {:acc (conj acc (- val last))
                 :last val})
@@ -18,7 +18,7 @@
 
 ; ------- Part 2 --------
 (->> input-val
-     (map #(Integer/parseInt %))
+     (map parse-long)
      (partition 3 1)
      (map #(reduce + %))
      (reduce (fn [{last :last acc :acc} val]

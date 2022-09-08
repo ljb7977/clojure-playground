@@ -5,15 +5,15 @@
 (def input-val (util/read-lines "y2018/day4-example.txt"))
 (def pattern #"\[(\d+)-(\d+)-(\d+) (\d+):(\d+)\] (wakes up|falls asleep|Guard #(\d+) begins shift)")
 
-; Integer/parseInt 한번에 할 수 있는 방법이 없을까?
+; parse-long을 한 번에 할 수 있는 방법이 없을까?
 (defn ->action-record-map [[year month day hour minute action guard-id]]
-  {:year     (Integer/parseInt year)
-   :month    (Integer/parseInt month)
-   :day      (Integer/parseInt day)
-   :hour     (Integer/parseInt hour)
-   :minute   (Integer/parseInt minute)
+  {:year     (parse-long year)
+   :month    (parse-long month)
+   :day      (parse-long day)
+   :hour     (parse-long hour)
+   :minute   (parse-long minute)
    :action   action
-   :guard-id (if-let [guard-id guard-id] (Integer/parseInt guard-id) nil)})
+   :guard-id (if-let [guard-id guard-id] (parse-long guard-id) nil)})
 
 (defn parse
   "문제의 입력을 파싱하여 action 하나의 정보를 담는 map으로 만듭니다.
