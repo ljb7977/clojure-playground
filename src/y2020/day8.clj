@@ -7,7 +7,7 @@
 (defn parse [x]
   (let [[op num] (clojure.string/split x #" ")]
     {:op (keyword op)
-     :arg (Integer/parseInt num)}))
+     :arg (parse-long num)}))
 
 (defn update-status
   "이 state machine의 :status를 다음 규칙에 맞게 업데이트합니다

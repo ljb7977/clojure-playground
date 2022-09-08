@@ -5,9 +5,10 @@
 
 
 ; -------- Part 1 ----------
-(->> input-val
-     (map #(Integer/parseInt %))
-     (apply +))
+(comment
+  (->> input-val
+       (map parse-long)
+       (apply +)))
 
 ; -------- Part 2 ----------
 ; version 1
@@ -23,7 +24,7 @@
 
 (comment
   (->> input-val
-       (map #(Integer/parseInt %))
+       (map parse-long)
        cycle
        iter))
 
@@ -37,7 +38,7 @@
 
 (comment
   (->> input-val
-       (map #(Integer/parseInt %))
+       (map parse-long)
        cycle
        (reductions +)
        find-first-duplicated-number))

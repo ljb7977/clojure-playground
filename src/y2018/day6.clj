@@ -3,29 +3,28 @@
 
 (defn parse [x]
   (let [t (clojure.string/split x #", ")]
-    (map #(Integer/parseInt %) t)))
+    (map parse-long t)))
 
 (def input-val
   (->> "y2018/day6.txt"
        util/read-lines
        (map parse)))
 
-(defn abs [x]
-  (max x (- x)))
-
-(defn get-manhattan-distance [[x1 y1] [x2 y2]]
+(defn get-manhattan-distance
   "두 좌표의 맨해튼 거리를 구합니다.
   Input: [[1 3] [2 1]]
   Output: 3"
+  [[x1 y1] [x2 y2]]
   (+ (abs (- x2 x1)) (abs (- y2 y1))))
 
 (defn transpose [xs]
   (apply map vector xs))
 
-(defn find-min-max-coords [coords]
+(defn find-min-max-coords
   "좌표 리스트를 받아서 가장 바깥 x, y 좌표들을 구합니다.
   Input: [(1 2) (3 4) (100 3) (3 100)]
   Output: {:xmin 1 :ymin 2 :xmax 100 :ymax 100}"
+  [coords]
   (let [[xs ys] (transpose coords)]
     {:xmin (apply min xs)
      :ymin (apply min ys)
@@ -42,9 +41,7 @@
     [x y]))
 
 (defn get-distance-to-each-targets
-  "
-  각 점으로부터 각 target까지의 맨해튼 거리를 구한 map의 리스트를 반환합니다.
-  "
+  "각 점으로부터 각 target까지의 맨해튼 거리를 구한 map의 리스트를 반환합니다."
   [points targets]
   (for [point points [target-id target-coord] targets]
     {:point     point
@@ -73,8 +70,8 @@
     {:point             point
      :closest-target-id closest-target-id}))
 
-(defn point-at-border? [[x y] {:keys [xmin ymin xmax ymax]}]
-  (or (= x xmin) (= y ymin) (= x xmax) (= y ymax)))
+(defn point-at-border? [[x y] {:keys [x-min y-min x-max y-max]}]
+  (or (= x x-min) (= y y-min) (= x x-max) (= y y-max)))
 
 (defn sum-distances [[_, ms]]
   (->> ms

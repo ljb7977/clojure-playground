@@ -11,7 +11,7 @@
 (comment
   ; Part 1
   (->> input-val
-       (map #(Integer/parseInt %))
+       (map parse-long)
        (combo-n 2)
        (filter #(= 2020 (apply + %)))
        first
@@ -19,7 +19,7 @@
 
   ; Part 2
   (->> input-val
-       (map #(Integer/parseInt %))
+       (map parse-long)
        (combo-n 3)
        (filter #(= 2020 (apply + %)))
        first

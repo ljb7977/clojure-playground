@@ -6,9 +6,6 @@
 
 (def example-input "dabAcCaCBAcCcaDA")
 
-(defn abs [n]
-  (max n (- n)))
-
 (defn same-letter-but-opposite-capitalization?
   "두 문자가 서로 같으면서 대소문자 여부만 다른지를 체크합니다.
 
