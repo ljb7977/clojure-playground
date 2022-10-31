@@ -120,3 +120,9 @@
        (map get-frequencies)
        (apply max-key #(max-val-of-map (second %))) ; 명시적으로 바인딩을 더 잘 해주고 싶은데...
        ((fn [[id minute-map]] (* id (first (apply max-key second (seq minute-map)))))))) ; 여기 함수로 잘 빼줘야 할듯
+
+(defn oops
+  [^Throwable x]
+  (println "An error occurred: " (.getMessage x)))
+
+(clojure.main/repl :caught opps)
