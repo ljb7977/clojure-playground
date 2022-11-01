@@ -1,4 +1,4 @@
-(ns dev-dive.03-debug-prn)
+(ns dev-dive.data)
 
 (def test-results [{:subject :math, :score 100, :grade "A+", :name "철수"}
                    {:subject :english, :score 90, :grade "A", :name "철수"}
@@ -10,28 +10,25 @@
                    {:subject :english, :score 40, :grade "C", :name "짱구"}
                    {:subject :science, :score 0, :grade "F", :name "짱구"}])
 
-(comment
-  ;; 그냥 prn
-  (->> test-results
-       (filter (fn [result] (> (:score result) 60)))
-       (map :score)
-       prn)
+(def names ["짱구" "철수" "유리" "맹구" "훈이" "흰둥이"])
 
-  (set! *print-level* 2)
-  (set! *print-length* 3)
+(defn score->grade [score]
+  (cond
+    (>= score 95) "A+"
+    (>= score 90) "A"
+    (>= score 85) "B+"
+    (>= score 80) "B"
+    (>= score 75) "C+"
+    (>= score 70) "C"
+    (>= score 65) "D+"
+    (>= score 60) "D"
+    :else "F"))
 
-  ;; prn in let bindings
-  (let [results-over-60 (filter (fn [result] (> (:score result) 60)) test-results)
-        _ (prn results-over-60)
-        processed-data (process-data data)
-        _ (prn processed-data)]
-    processed-data)
-
-  ;; doto prn
-  (let [data (doto (fetch-data db) prn)])
-
-  ;; doto prn in threading macro
-  (-> m
-      (transform)
-      (transform-2)
-      (doto prn)))
+(defn generate-test-results []
+  (for [name names
+        subject [:math :english :science :history :korean :music]]
+    (let [score (+ 50 (rand-int 51))]
+      {:name name
+       :subject subject
+       :score score
+       :grade (score->grade score)})))
