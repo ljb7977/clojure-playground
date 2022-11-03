@@ -1,14 +1,18 @@
 (ns dev-dive.07-tap-let
-  (:require [pez.taplet :refer [let>]]))
+  (:require [dev-dive.data :refer [test-results]]
+            [pez.taplet :refer [let>]]))
+
+(defn filter-students [test-results]
+  ;; let> 매크로 사용
+  (let [filtered (filter #(> (:score %) 80) test-results)
+        names (map :name filtered)
+        name-set (set names)]
+    name-set))
 
 (comment
-  ;; let-tap
-  (let> [a 1
-         b :keyword
-         c "string"
-         {name :name
-          age  :age
-          :as  d} {:name    "Harry"
-                   :surname "Porter"
-                   :age     20}]
-    [a b c d name age]))
+  ;; 1. 그냥 실행
+  (filter-students test-results)
+
+  ;; 2. let> 매크로 사용
+
+  ,)
