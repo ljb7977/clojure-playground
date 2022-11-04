@@ -2,6 +2,7 @@
   (:require [dev-dive.data :refer [test-results
                                    generate-test-results]]))
 
+;; ->tap 정의
 (defn ->tap [x]
   (tap> x)
   x)
@@ -22,9 +23,11 @@
 
   ;; 2. 스레딩 매크로
   (->> test-results
-       (filter #(< (:score %) 60))
-       ;; 여기서 filter의 결과값을 알고 싶다면..?
-       (map :score))
+       (filter #(> (:score %) 80))
+       (->tap)
+       (map :name)
+       (->tap)
+       set)
 
   ;; 3
   (filter-students test-results)

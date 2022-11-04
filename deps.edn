@@ -2,5 +2,7 @@
          org.clojure/algo.monads        {:mvn/version "0.1.6"}
          failjure/failjure              {:mvn/version "2.2.0"}
          uncomplicate/fluokitten        {:mvn/version "0.9.1"}
-         pez/taplet                     {:local/root "./taplet"}}
+         pez/taplet                     {#_#_:local/root "./taplet"
+                                         :git/url "https://github.com/ljb7977/taplet"
+                                         :git/sha "c59add434716855f1dfd60a30645d6262432d6d7"}}
  :paths ["src" "resources"]}
