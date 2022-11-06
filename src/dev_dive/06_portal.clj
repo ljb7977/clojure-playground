@@ -19,7 +19,9 @@
   (tap> "Hello world")
   (tap> [1 2 3 4 5])
   (tap> {:name "Jubeen"
-         :age 26})
+         :surname "Lee"
+         :job "Programmer"
+         :language "Clojure"})
 
   ;; 2. 스레딩 매크로
   (->> test-results
@@ -33,4 +35,5 @@
   (filter-students test-results)
 
   ;; 4. 많은 양의 데이터
+  (generate-test-results)
   (tap> (generate-test-results)))

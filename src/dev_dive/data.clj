@@ -25,10 +25,14 @@
     :else "F"))
 
 (defn generate-test-results []
-  (for [name names
-        subject [:math :english :science :history :korean :music]]
-    (let [score (+ 50 (rand-int 51))]
-      {:name name
-       :subject subject
-       :score score
-       :grade (score->grade score)})))
+  (-> (for [name names
+            subject [:math :english :science :history :korean :music]]
+        (let [score (+ 50 (rand-int 51))]
+          {:name name
+           :subject subject
+           :score score
+           :grade (score->grade score)}))
+      shuffle))
+
+(comment
+  (tap> (generate-test-results)))

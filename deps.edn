@@ -4,5 +4,5 @@
          uncomplicate/fluokitten        {:mvn/version "0.9.1"}
          pez/taplet                     {#_#_:local/root "./taplet"
                                          :git/url "https://github.com/ljb7977/taplet"
-                                         :git/sha "c59add434716855f1dfd60a30645d6262432d6d7"}}
+                                         :git/sha "0e8007d6c43f7793c63c8845698351e533bee401"}}
  :paths ["src" "resources"]}
