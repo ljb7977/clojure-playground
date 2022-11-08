@@ -198,9 +198,6 @@
        (map (fn [product] (assoc product :prev-price (+ 100 (* (rand-int 100) 100)))))
        (map (fn [product] (assoc product :price (+ 100 (* (rand-int 100) 100)))))))
 
-(comment)
-
-
 (def test-results [{:subject :math, :score 100, :grade "A+", :name "철수"}
                    {:subject :english, :score 90, :grade "A", :name "철수"}
                    {:subject :science, :score 80, :grade "B", :name "철수"}
