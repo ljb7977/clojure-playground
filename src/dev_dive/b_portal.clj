@@ -1,5 +1,5 @@
-(ns dev-dive.06-portal
-  (:require [dev-dive.data :refer [example-products generate-products]]))
+(ns dev-dive.b-portal
+  (:require [dev-dive.data :refer [example-products products-from-db]]))
 
 ;; ->tap 정의
 (defn ->tap [x]
@@ -39,7 +39,7 @@
        ,)
 
   ;; 3. 많은 양의 데이터
-  (def more-products (generate-products))
+  (def more-products (products-from-db))
   (tap> more-products)
 
   ;; 3

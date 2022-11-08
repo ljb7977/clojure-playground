@@ -191,7 +191,7 @@
                      "머스크 메론"
                      "가을 무"])
 
-(defn generate-products []
+(defn products-from-db []
   (->> (range (count product-names))
        (map (fn [id] {:id id
                       :name (nth product-names id)}))

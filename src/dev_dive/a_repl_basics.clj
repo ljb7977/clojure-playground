@@ -1,5 +1,5 @@
-(ns dev-dive.01-repl-basics
-  (:require [dev-dive.data :refer [example-products generate-products]]))
+(ns dev-dive.a-repl-basics
+  (:require [dev-dive.data :refer [example-products products-from-db]]))
 
 (defn top-price-increased-products [products]
   (->> products
@@ -25,7 +25,7 @@
   ;; 2. 함수로 분리하기
 
   ;; 3. 더 많은 데이터에 대해 적용
-  (def more-products (generate-products))
+  (def more-products (products-from-db))
 
   (top-price-increased-products more-products)
   ,)

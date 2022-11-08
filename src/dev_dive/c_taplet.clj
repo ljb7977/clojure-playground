@@ -1,4 +1,4 @@
-(ns dev-dive.07-tap-let
+(ns dev-dive.c-taplet
   (:require [dev-dive.data :refer [test-results]]
             [pez.taplet :refer [let>]]))
 
