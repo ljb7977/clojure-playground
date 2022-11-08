@@ -6,7 +6,7 @@
        (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
        (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
        (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
-       (sort-by :price-diff-rate)))
+       (sort-by :price-diff-rate >)))
        ;(map :name)))
 
 (comment
@@ -18,7 +18,7 @@
        (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
        (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
        (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
-       (sort-by :price-diff-rate)
+       (sort-by :price-diff-rate >)
        (map :name)
        ,)
 

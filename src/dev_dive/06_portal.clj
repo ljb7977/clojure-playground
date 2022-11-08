@@ -1,18 +1,19 @@
 (ns dev-dive.06-portal
-  (:require [dev-dive.data :refer [test-results
-                                   generate-test-results]]))
+  (:require [dev-dive.data :refer [example-products generate-products]]))
 
 ;; ->tap 정의
 (defn ->tap [x]
   (tap> x)
   x)
 
-(defn filter-students [test-results]
-  ;; 3. 사이사이 ->tap 사용
-  (->> test-results
-       (filter #(> (:score %) 80))
-       (map :name)
-       (set)))
+;; 3. 사이사이에 ->tap 사용
+(defn top-price-increased-products [products]
+  (->> products
+       (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
+       (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
+       (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
+       (sort-by > :price-diff-rate)
+       (map :name)))
 
 (comment
   ;; 1. 기본 사용법
@@ -24,17 +25,22 @@
          :language "Clojure"})
 
   ;; 2. 스레딩 매크로
-  (->> test-results
-       (filter #(> (:score %) 80))
-       (->tap)
+  (->> example-products
+       (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
+       ;(->tap)
+       (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
+       ;(->tap)
+       (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
+       ;(->tap)
+       (sort-by :price-diff-rate >)
+       ;(->tap)
        (map :name)
        (->tap)
-       (set)
-       (->tap))
+       ,)
+
+  ;; 3. 많은 양의 데이터
+  (def more-products (generate-products))
+  (tap> more-products)
 
   ;; 3
-  (filter-students test-results)
-
-  ;; 4. 많은 양의 데이터
-  (generate-test-results)
-  (tap> (generate-test-results)))
+  (top-price-increased-products more-products))
