@@ -9,10 +9,13 @@
 ;; 3. 사이사이에 ->tap 사용
 (defn top-price-increased-products [products]
   (->> products
-       (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
-       (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
-       (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
-       (sort-by > :price-diff-rate)
+       (map (fn [{:keys [prev-price price] :as product}]
+              (assoc product :price-diff (- price prev-price))))
+       (map (fn [{:keys [prev-price price-diff] :as product}]
+              (assoc product :price-diff-rate (* (/ price-diff prev-price) 100.0))))
+       (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 10)))
+       (->tap)
+       (sort-by :price-diff-rate >)
        (map :name)))
 
 (comment
@@ -27,7 +30,7 @@
   ;; 2. 스레딩 매크로
   (->> example-products
        (map (fn [{:keys [prev-price price] :as product}] (assoc product :price-diff (- price prev-price))))
-       ;(->tap)
+       (->tap)
        (map (fn [{:keys [prev-price price-diff] :as product}] (assoc product :price-diff-rate (* (/ price-diff prev-price) 1.0))))
        ;(->tap)
        (filter (fn [{:keys [price-diff-rate]}] (> price-diff-rate 0.1)))
@@ -35,8 +38,10 @@
        (sort-by :price-diff-rate >)
        ;(->tap)
        (map :name)
-       (->tap)
+       ;(->tap)
        ,)
+
+  (top-price-increased-products example-products)
 
   ;; 3. 많은 양의 데이터
   (def more-products (products-from-db))
