@@ -29,7 +29,8 @@
        (->tap)
        (map :name)
        (->tap)
-       set)
+       (set)
+       (->tap))
 
   ;; 3
   (filter-students test-results)
