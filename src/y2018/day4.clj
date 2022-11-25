@@ -30,7 +30,6 @@
        rest
        ->action-record-map))
 
-; 자료구조가 불안불안하다...
 (defn records->sleeping-ranges
   "위에서 parsing한 map 리스트를 가지고, 잠에 든 시간부터 일어나는 시간까지를 한 묶음으로 묶어 줍니다.
   Input: {:result [] :curr {}}, {:action \"Guard #2081 begins shift\" :month 2 :day 6 :hour 23 :minute 51 :guard-id 2081}
@@ -98,12 +97,17 @@
        (apply max-key #(second %))
        first))
 
+(defn ->tap [x]
+  (tap> x)
+  x)
+
 (comment
   ; ----- Part 1: 가장 잠을 많이 잔 가드가, 가장 많이 잠들어있던 minute와 그 가드 id의 곱
   (->> input-val
        sort
        (map parse)
        (reduce records->sleeping-ranges {:result [] :curr {}})
+       (->tap)
        :result
        (reduce collect-minutes {})
        (apply max-key #(count (second %)))
@@ -120,9 +124,3 @@
        (map get-frequencies)
        (apply max-key #(max-val-of-map (second %))) ; 명시적으로 바인딩을 더 잘 해주고 싶은데...
        ((fn [[id minute-map]] (* id (first (apply max-key second (seq minute-map)))))))) ; 여기 함수로 잘 빼줘야 할듯
-
-(defn oops
-  [^Throwable x]
-  (println "An error occurred: " (.getMessage x)))
-
-(clojure.main/repl :caught opps)

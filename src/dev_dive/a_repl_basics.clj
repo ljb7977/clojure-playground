@@ -7,7 +7,8 @@
   ;; 0. 데이터 확인
   example-products
 
-  ;; 1. 시세의 변동폭이 10% 이상인 과일/채소들을, 변동폭이 높은 순서대로 이름을 구하기
+  ;; 1. 시세의 변동폭이 10% 이상인 과일/채소들을,
+  ;; 변동폭이 높은 순서대로 이름을 구하기
 
   ;; 2. 함수로 분리하기
   (top-price-increased-products example-products)
