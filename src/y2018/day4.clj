@@ -30,7 +30,6 @@
        rest
        ->action-record-map))
 
-; 자료구조가 불안불안하다...
 (defn records->sleeping-ranges
   "위에서 parsing한 map 리스트를 가지고, 잠에 든 시간부터 일어나는 시간까지를 한 묶음으로 묶어 줍니다.
   Input: {:result [] :curr {}}, {:action \"Guard #2081 begins shift\" :month 2 :day 6 :hour 23 :minute 51 :guard-id 2081}
@@ -98,12 +97,17 @@
        (apply max-key #(second %))
        first))
 
+(defn ->tap [x]
+  (tap> x)
+  x)
+
 (comment
   ; ----- Part 1: 가장 잠을 많이 잔 가드가, 가장 많이 잠들어있던 minute와 그 가드 id의 곱
   (->> input-val
        sort
        (map parse)
        (reduce records->sleeping-ranges {:result [] :curr {}})
+       (->tap)
        :result
        (reduce collect-minutes {})
        (apply max-key #(count (second %)))

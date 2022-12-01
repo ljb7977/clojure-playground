@@ -28,6 +28,9 @@
        cycle
        iter))
 
+
+
+
 ; version 2: using reduce
 ; loop-recur == reduce
 (defn find-first-duplicated-number [xs]
