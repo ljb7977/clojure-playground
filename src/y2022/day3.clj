@@ -13,10 +13,26 @@
       (<= 65 ascii-code 90)  (+ (- ascii-code 65) 27) ;; 대문자
       ,)))
 
+(defn find-only-common-char-priority [strs]
+  (->> strs
+       (map set)
+       (apply clojure.set/intersection)
+       first
+       char->priority))
+
 (comment
+  ;; Part 1
   (->> (clojure.string/split-lines input)
        (map split-half)
-       (map (fn [[f s]] (clojure.set/intersection (set f) (set s))))
-       (map first)
-       (map char->priority)
-       (apply +)))
+       (map find-only-common-char-priority)
+       (apply +))
+  := 7997
+
+  ;; Part 2
+  (->> (clojure.string/split-lines input)
+       (partition 3)
+       (map find-only-common-char-priority)
+       (apply +))
+  := 2545
+
+  :rcf)
