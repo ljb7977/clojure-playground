@@ -83,11 +83,11 @@
   (let [assignable-jobs (->> graph
                              get-keys-where-value-is-empty
                              (sort compare))]
-    (reduce (fn [acc val]
+    (reduce (fn [workers new-job]
               (cond
-                (= (count acc) max-workers) (reduced acc)
-                (contains? acc val) acc                     ; already working?
-                :else (assoc acc val (get-duration-of-job val duration-offset))))
+                (= (count workers) max-workers) (reduced workers)
+                (contains? workers new-job) workers                     ; already working?
+                :else (assoc workers new-job (get-duration-of-job new-job duration-offset))))
             workers
             assignable-jobs)))
 (assign-jobs-to-workers {} {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}} 5 61)
@@ -130,23 +130,23 @@
            :duration-offset 61
            :elasped-time 1}"
   [{:keys [graph workers max-workers duration-offset] :as state}]
-  (let [{finished-jobs :finished-jobs
-         workers'      :workers}
-        (-> workers
-            (assign-jobs-to-workers graph max-workers duration-offset)
-            process-workers-one-step
-            reap-finished-job)]
+  (let [{:keys [finished-jobs workers]} (-> workers
+                                            (assign-jobs-to-workers graph max-workers duration-offset)
+                                            process-workers-one-step
+                                            reap-finished-job)]
     (-> state
-        (assoc :workers workers')
+        (assoc :workers workers)
         (update :graph #(remove-jobs-from-graph % finished-jobs))
         (update :elapsed-time inc)
         (update :result #(concat % finished-jobs)))))
-;(process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
-;                            :workers {}
-;                            :result []
-;                            :max-workers 5
-;                            :duration-offset 61
-;                            :elapsed-time 0})
+
+(comment
+  (process-step-with-workers {:graph {\A #{\C}, \B #{\A}, \C #{}, \D #{\A}, \E #{\B \D \F}, \F #{\C}}
+                              :workers {}
+                              :result []
+                              :max-workers 5
+                              :duration-offset 61
+                              :elapsed-time 0}))
 
 (defn init [{:keys [max-workers duration-offset]} graph]
   {:graph graph
@@ -164,7 +164,6 @@
 
 (comment
   ; Part 1
-  ; Answer: EPWCFXKISTZVJHDGNABLQYMORU
   (->> input-val
        parse
        (init {:max-workers 1 :duration-offset 1})
@@ -172,12 +171,16 @@
        (drop-while ongoing?)
        first
        get-result-as-string)
+  := "EPWCFXKISTZVJHDGNABLQYMORU"
+
   ; Part 2
-  ; Answer: 952
   (->> input-val
        parse
        (init {:max-workers 5 :duration-offset 61})
        (iterate process-step-with-workers)
        (drop-while ongoing?)
        first
-       :elapsed-time))
+       :elapsed-time)
+  := 952
+
+  :rcf)
