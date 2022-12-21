@@ -23,4 +23,3 @@
          (take 3)
          (apply +)))
   :rcf)
-
