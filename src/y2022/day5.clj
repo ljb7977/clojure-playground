@@ -41,6 +41,7 @@
                  (assoc to to-column'))
      :from from
      :to to}))
+
 (defn process-moves [stacks [n from to]]
   (->> {:stacks stacks
         :from from
@@ -49,6 +50,18 @@
        (drop n)
        first
        :stacks))
+
+(defn process-moves-multiple [stacks [n from to]]
+  (let [from-column (nth stacks from)
+        len (count from-column)
+        [from-column' top-elems] (->> from-column
+                                      (split-at (- len n))
+                                      (map vec))
+        to-column (nth stacks to)
+        to-column' (vec (concat to-column top-elems))]
+    (-> stacks
+        (assoc from from-column')
+        (assoc to to-column'))))
 
 (defn get-top-crates [stacks]
   (->> (rest stacks)
@@ -69,5 +82,12 @@
          get-top-crates
          (apply str)))
   := "TDCHVHJTG"
-  
+
+  (let [[stacks moves] (parse-input input)]
+    (->> moves
+         (reduce process-moves-multiple stacks)
+         get-top-crates
+         (apply str)))
+  := "NGCMPJLHV"
+
   :rcf)
