@@ -95,9 +95,7 @@
         size-of-root-dir (get-in root-dir [:info :size])
         unused-space (- 70000000 size-of-root-dir)
         required-space (- 30000000 unused-space)  ;; 얘보다 큰 애들 중에 가장 작은 애를 뽑는다
-        dir-sizes (-> file-tree-with-size
-                      (get "/")
-                      collect-dir-sizes)]
+        dir-sizes (collect-dir-sizes root-dir)]
     (->> dir-sizes
          (filter #(> % required-space))
          (apply min)))
