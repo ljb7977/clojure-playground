@@ -24,7 +24,6 @@
   (parse-line "123124 a.jpg")
   (parse-line "dir hello"))
 
-
 (defn scan-command-result [{:keys [current-dir file-tree] :as state} val]
   (case (:type val)
     :cd (let [{:keys [dirname]} val]
@@ -39,32 +38,26 @@
                    {:current-dir current-dir
                     :file-tree (assoc-in file-tree path {:info val})})))
 
-(defn walk-calc-size [file-tree]
-  (postwalk (fn [node]
-              (if (not (:info node)) ; info가 없으면 더 밑으로 내려가면 안 됨
-                node
-                (case (get-in node [:info :type])
-                  :file node
-                  :dir (let [children (-> node
-                                          (dissoc :info)
-                                          vals)
-                             size (->> children
-                                       (map #(get-in % [:info :size]))
-                                       (apply +))]
-                          (assoc-in node [:info :size] size))
-                  (throw (ex-info "unknown" {:node node})))))
-            file-tree))
+(defn update-size-for-dir
+  "node의 info가 없거나, type이 dir이 아니면 (즉, file이면) 더 밑으로 내려가면 안 되고, 그냥 자기 자신을 반환한다.
+  node의 type이 dir이면, 모든 children의 size를 합하여 자신의 size에 업데이트한다"
+  [node]
+  (if (= (get-in node [:info :type]) :dir)
+    (let [children (-> node (dissoc :info) vals)
+          size (->> children
+                    (map #(get-in % [:info :size]))
+                    (apply +))]
+      (assoc-in node [:info :size] size))
+    node))
 
-(defn collect-dir-sizes [tree]
-  (case (get-in tree [:info :type])
+(defn collect-dir-sizes [node]
+  (case (get-in node [:info :type])
     :file []
-    :dir (let [children (-> tree
-                            (dissoc :info)
-                            vals)
-               size (get-in tree [:info :size])]
+    :dir (let [children (-> node (dissoc :info) vals)
+               size (get-in node [:info :size])]
            (conj (mapcat collect-dir-sizes children) size))
-    (throw (ex-info "no matching clause" {:node tree
-                                          :type (get-in tree [:info :type])}))))
+    (throw (ex-info "no matching clause" {:node node
+                                          :type (get-in node [:info :type])}))))
 
 (defn parse-input [input]
   (->> (clojure.string/split-lines input)
@@ -75,14 +68,6 @@
        :file-tree))
 
 (comment
-  {:type :cd, :dirname "/"}
-  {:type :ls}
-  {:type :dir, :name "a"}
-  {:type :file, :name "b.txt", :size 14848514}
-  {:type :file, :name "c.dat", :size 8504156}
-  {:type :dir, :name "d"}
-  {:type :cd, :dirname "a"}
-  
   (scan-command-result {:current-dir [] :file-tree {}}
                        {:type :cd, :dirname "/"})
   (scan-command-result {:current-dir ["/"], :file-tree {}} 
@@ -92,20 +77,20 @@
   (scan-command-result {:current-dir ["/"], :file-tree {"/" {"a" {:type :dir, :name "a"}}}}
                        {:type :file, :name "b.txt", :size 14848514})
   
+  ;; Part 1
   (let [file-tree (parse-input input)
-        file-tree-with-size (walk-calc-size file-tree)
+        file-tree-with-size (postwalk update-size-for-dir file-tree)
         dir-sizes (-> file-tree-with-size
                       (get "/")
                       collect-dir-sizes)]
     (->> dir-sizes
          (filter #(<= % 100000))
          (apply +)))
-  := 1581595)
-
-;; Part 2
-(comment
+  := 1581595
+  
+  ;; Part 2
   (let [file-tree (parse-input input)
-        file-tree-with-size (walk-calc-size file-tree)
+        file-tree-with-size (postwalk update-size-for-dir file-tree)
         root-dir (get file-tree-with-size "/")
         size-of-root-dir (get-in root-dir [:info :size])
         unused-space (- 70000000 size-of-root-dir)
