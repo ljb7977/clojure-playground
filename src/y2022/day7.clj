@@ -45,11 +45,12 @@
                 node
                 (case (get-in node [:info :type])
                   :file node
-                  :dir (let [size (->> node
-                                        (filter #(not= (key %) :info))
-                                        vals
-                                        (map #(get-in % [:info :size]))
-                                        (apply +))]
+                  :dir (let [children (-> node
+                                          (dissoc :info)
+                                          vals)
+                             size (->> children
+                                       (map #(get-in % [:info :size]))
+                                       (apply +))]
                           (assoc-in node [:info :size] size))
                   (throw (ex-info "unknown" {:node node})))))
             file-tree))
@@ -57,11 +58,10 @@
 (defn collect-dir-sizes [tree]
   (case (get-in tree [:info :type])
     :file []
-    :dir (let [children (->> tree
-                             (filter #(not= (key %) :info))
-                             vals)
-               size (get-in tree [:info :size])
-               name (get-in tree [:info :name])]
+    :dir (let [children (-> tree
+                            (dissoc :info)
+                            vals)
+               size (get-in tree [:info :size])]
            (conj (mapcat collect-dir-sizes children) size))
     (throw (ex-info "no matching clause" {:node tree
                                           :type (get-in tree [:info :type])}))))
