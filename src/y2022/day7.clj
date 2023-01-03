@@ -1,6 +1,6 @@
 (ns y2022.day7
   (:require [clojure.core.match :refer [match]]
-            [clojure.walk :refer [postwalk postwalk-demo]]))
+            [clojure.walk :refer [postwalk]]))
 
 (def input (slurp "src/y2022/day7.txt"))
 
@@ -60,10 +60,19 @@
     :dir (let [children (->> tree
                              (filter #(not= (key %) :info))
                              vals)
-               size (get-in tree [:info :size])]
+               size (get-in tree [:info :size])
+               name (get-in tree [:info :name])]
            (conj (mapcat collect-dir-sizes children) size))
-    (throw (ex-info "no matchin clause" {:node tree
-                                         :type (get-in tree [:info :type])}))))
+    (throw (ex-info "no matching clause" {:node tree
+                                          :type (get-in tree [:info :type])}))))
+
+(defn parse-input [input]
+  (->> (clojure.string/split-lines input)
+       (map parse-line)
+       (reduce scan-command-result {:current-dir []
+                                    :file-tree {"/" {:info {:type :dir
+                                                            :name "/"}}}})
+       :file-tree))
 
 (comment
   {:type :cd, :dirname "/"}
@@ -74,8 +83,7 @@
   {:type :dir, :name "d"}
   {:type :cd, :dirname "a"}
   
-  (scan-command-result {:current-dir []
-                        :file-tree {}}
+  (scan-command-result {:current-dir [] :file-tree {}}
                        {:type :cd, :dirname "/"})
   (scan-command-result {:current-dir ["/"], :file-tree {}} 
                        {:type :ls})
@@ -84,16 +92,28 @@
   (scan-command-result {:current-dir ["/"], :file-tree {"/" {"a" {:type :dir, :name "a"}}}}
                        {:type :file, :name "b.txt", :size 14848514})
   
-  (let [size-calced (->> (clojure.string/split-lines input)
-                         (map parse-line)
-                         (reduce scan-command-result {:current-dir []
-                                                      :file-tree {"/" {:info {:type :dir
-                                                                              :name "/"}}}})
-                         :file-tree
-                         walk-calc-size)
-        dir-sizes (-> size-calced
+  (let [file-tree (parse-input input)
+        file-tree-with-size (walk-calc-size file-tree)
+        dir-sizes (-> file-tree-with-size
                       (get "/")
                       collect-dir-sizes)]
     (->> dir-sizes
          (filter #(<= % 100000))
-         (apply +))))
+         (apply +)))
+  := 1581595)
+
+;; Part 2
+(comment
+  (let [file-tree (parse-input input)
+        file-tree-with-size (walk-calc-size file-tree)
+        root-dir (get file-tree-with-size "/")
+        size-of-root-dir (get-in root-dir [:info :size])
+        unused-space (- 70000000 size-of-root-dir)
+        required-space (- 30000000 unused-space)  ;; 얘보다 큰 애들 중에 가장 작은 애를 뽑는다
+        dir-sizes (-> file-tree-with-size
+                      (get "/")
+                      collect-dir-sizes)]
+    (->> dir-sizes
+         (filter #(> % required-space))
+         (apply min)))
+  := 1544176)
