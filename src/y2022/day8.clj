@@ -7,9 +7,10 @@
 (defn parse-input [input]
   (->> (clojure.string/split-lines input)
        (mapv #(mapv char->int %))))
-(def input (parse-input (slurp "src/y2022/day8.txt")))
-(def sample-input (parse-input "30373\n25512\n65332\n33549\n35390"))
 
+(def input (parse-input (slurp "src/y2022/day8.txt")))
+
+(def sample-input (parse-input "30373\n25512\n65332\n33549\n35390"))
 
 (defn conj-visible [{:keys [max visibility]} val]
   (if (> val max)
@@ -33,34 +34,35 @@
                  0
                  sub-xs))
        vec))
-(defn flip-matrix [mat]
-  (->> mat
-       (mapv (fn [xs] (->> xs rseq (into []))))))
+
+(defn flip [matrix]
+  (->> matrix
+       (mapv #(->> % rseq vec))))
 
 (defn transpose [mat]
   (apply map vector mat))
 
-(defn apply-f-for-matrix-for-all-directions [f mat]
-  (let [left (->> mat
+(defn apply-f-for-all-directions [f matrix]
+  (let [left (->> matrix
                   (mapv f))
-        right (->> mat
-                   flip-matrix
+        right (->> matrix
+                   flip
                    (mapv f)
-                   flip-matrix)
-        transposed (transpose mat)
+                   flip)
+        transposed (transpose matrix)
         top (->> transposed
                  (mapv f)
                  transpose)
         bottom (->> transposed
-                    flip-matrix
+                    flip
                     (map f)
-                    flip-matrix
+                    flip
                     transpose)]
     [left right top bottom]))
 
 (comment
   ;; Part 1
-  (let [[l r t b] (apply-f-for-matrix-for-all-directions calc-visibility input)
+  (let [[l r t b] (apply-f-for-all-directions calc-visibility input)
         [l r t b] (map #(apply concat %) [l r t b])]
     (->> (map (fn [& xs] (some true? xs)) l r t b)
          (filter true?)
@@ -68,9 +70,8 @@
   := 1695
 
   ;; Part 2
-  (let [[l r t b] (apply-f-for-matrix-for-all-directions calc-scenic-score input)
+  (let [[l r t b] (apply-f-for-all-directions calc-scenic-score input)
         [l r t b] (map #(apply concat %) [l r t b])]
     (->> (map * l r t b)
          (apply max)))
-
   := 287040)
