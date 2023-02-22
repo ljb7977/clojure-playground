@@ -10,10 +10,13 @@
        (map #(str/split % #" "))
        (map (fn [[direction amount]] [direction (parse-long amount)]))))
 
-(defn next-tail-position [{head-x :x head-y :y :as new-head}
-                          {tail-x :x tail-y :y :as tail}]
-  ;(prn "new-head" new-head)
-  ;(prn "tail" tail)
+(defn input->directions [input]
+  (->> input
+       (map (fn [[direction amount]] (repeat amount direction)))
+       (apply concat)))
+
+(defn get-new-tail [{head-x :x head-y :y :as new-head}
+                    {tail-x :x tail-y :y :as tail}]
   (let [dx (- head-x tail-x)
         dy (- head-y tail-y)]
     (cond
@@ -44,42 +47,37 @@
     "L" {:x (dec x) :y y}
     "R" {:x (inc x) :y y}))
 
-(defn process-step [{:keys [visited head tail] :as acc} direction]
-  (let [new-head (get-new-head head direction)
-        new-tail (next-tail-position new-head tail)]
-    {:visited (conj visited new-tail)
-     :head new-head
-     :tail new-tail}))
-
-(defn process-step-2 [{:keys [rope visited]} direction]
-  (let [new-head (get-new-head (first rope) direction)
+(defn process-step [{:keys [rope visited]} direction]
+  (let [[head & tails] rope
+        new-head (get-new-head head direction)
         new-rope (reduce (fn [acc val]
-                           (let [last-new-coord (last acc)]
-                             (conj acc (next-tail-position last-new-coord val))))
+                           (let [new-head' (last acc)]
+                             (conj acc (get-new-tail new-head' val))))
                          [new-head]
-                         (rest rope))
+                         tails)
         new-tail (last new-rope)]
     {:visited (conj visited new-tail)
      :rope new-rope}))
 
 (comment
   ;; Part 1
-  (let [directions (->> (parse-input input)
-                        (map (fn [[direction amount]] (repeat amount direction)))
-                        (apply concat))]
+  (let [directions (-> input
+                       parse-input
+                       input->directions)]
     (-> (reduce process-step
-                {:head {:x 0 :y 0}
-                 :tail {:x 0 :y 0}
+                {:rope [{:x 0 :y 0}
+                        {:x 0 :y 0}]
                  :visited #{{:x 0 :y 0}}}
                 directions)
         :visited
         count))
   := 5878
 
-  (let [directions (->> (parse-input input)
-                        (map (fn [[direction amount]] (repeat amount direction)))
-                        (apply concat))]
-    (-> (reduce process-step-2
+  ;; Part 2
+  (let [directions (-> input
+                       parse-input
+                       input->directions)]
+    (-> (reduce process-step
                 {:rope (vec (repeat 10 {:x 0 :y 0}))
                  :visited #{{:x 0 :y 0}}}
                 directions)
