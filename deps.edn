@@ -1,9 +1,11 @@
-{:deps  {org.clojure/math.combinatorics {:mvn/version "0.1.6"}
-         org.clojure/algo.monads        {:mvn/version "0.1.6"}
-         failjure/failjure              {:mvn/version "2.2.0"}
-         uncomplicate/fluokitten        {:mvn/version "0.9.1"}
-         pez/taplet                     {#_#_:local/root "./taplet"
-                                         :git/url "https://github.com/ljb7977/taplet"
-                                         :git/sha "0e8007d6c43f7793c63c8845698351e533bee401"}
-         org.clojure/core.match {:mvn/version "1.0.0"}}
+{:deps  {org.clojure/math.combinatorics      {:mvn/version "0.1.6"}
+         org.clojure/algo.monads             {:mvn/version "0.1.6"}
+         failjure/failjure                   {:mvn/version "2.2.0"}
+         uncomplicate/fluokitten             {:mvn/version "0.9.1"}
+         clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
+         funcool/promesa                     {:mvn/version "10.0.594"}
+         pez/taplet                          {#_#_:local/root "./taplet"
+                                              :git/url "https://github.com/ljb7977/taplet"
+                                              :git/sha "0e8007d6c43f7793c63c8845698351e533bee401"}
+         org.clojure/core.match              {:mvn/version "1.0.0"}}
  :paths ["src" "resources"]}
