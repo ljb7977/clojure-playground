@@ -28,6 +28,12 @@
                  :current-cycle (inc current-cycle)
                  :current-command (first commands)}))))
 
+(defn get-pixel [{:keys [x current-cycle]}]
+  (let [xs #{(dec x) x (inc x)}
+        current-pixel (rem (dec current-cycle) 40)]
+    (if (xs current-pixel)
+      "#" ".")))
+
 (comment
   ;; Part 1
   (let [commands (->> (clojure.string/split-lines input)
@@ -41,4 +47,26 @@
          (filter #(#{20 60 100 140 180 220} (:current-cycle %)))
          (map #(* (:x %) (:current-cycle %)))
          (apply +)))
-  := 14220)
+  := 14220
+
+  ;; Part 2
+  (let [commands (->> (clojure.string/split-lines input)
+                      (map parse-command))]
+    (->> {:commands (rest commands)
+          :x 1
+          :current-cycle 1
+          :current-command (first commands)}
+         (iterate process-command)
+         (take 240)
+         (map #(select-keys % [:x :current-cycle]))
+         (map get-pixel)
+         (partition 40)
+         (map clojure.string/join)))
+
+  ["####.###...##..###..#....####.####.#..#."
+   "...#.#..#.#..#.#..#.#....#.......#.#..#."
+   "..#..#..#.#..#.#..#.#....###....#..#..#."
+   ".#...###..####.###..#....#.....#...#..#."
+   "#....#.#..#..#.#.#..#....#....#....#..#."
+   "####.#..#.#..#.#..#.####.#....####..##.."]
+  := "ZRARLFZU")
