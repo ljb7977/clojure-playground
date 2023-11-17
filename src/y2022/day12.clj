@@ -13,18 +13,20 @@
   [[x1 y1] [x2 y2]]
   [(+ x1 x2) (+ y1 y2)])
 
+(defn char->int [ch]
+  (case ch
+    \S -1
+    \E 26
+    (- (int ch) (int \a))))
+  
+
 (defn parse 
-  "입력을 파싱하여 정수의 2차원 행렬로 바꿔 주는 함수. \S와 \E는 나중에 찾기 편하기 위해 편의상 -1과 26으로 만들고, 나머지 소문자는 0~25의 값을 가지도록 한다"
+  "입력을 파싱하여 정수의 2차원 행렬로 바꿔 주는 함수. 
+  S와 E는 나중에 찾기 편하기 위해 편의상 -1과 26으로 만들고, 나머지 소문자는 0~25의 값을 가지도록 한다"
   [input-str]
   (let [matrix (->> (clojure.string/split-lines input-str)
                     (map vec))]
-    (vec (for [line matrix]
-           (vec (for [c line]
-                  (case c
-                    \S -1
-                    \E 26
-                    (- (int c) (int \a)))))))))
-
+    (mapv #(mapv char->int %) matrix)))
 
 (defn bfs [{:keys [visited endpoint matrix queue distance] :as state}]
   (if (or (empty? queue) (= (first queue) endpoint))
