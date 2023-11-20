@@ -24,8 +24,7 @@
   "입력을 파싱하여 정수의 2차원 행렬로 바꿔 주는 함수. 
   S와 E는 나중에 찾기 편하기 위해 편의상 -1과 26으로 만들고, 나머지 소문자는 0~25의 값을 가지도록 한다"
   [input-str]
-  (let [matrix (->> (clojure.string/split-lines input-str)
-                    (map vec))]
+  (let [matrix (map vec (clojure.string/split-lines input-str))]
     (mapv #(mapv char->int %) matrix)))
 
 (defn bfs [{:keys [visited endpoint matrix queue distance] :as state}]
@@ -52,11 +51,12 @@
           (assoc :queue new-queue)
           (assoc :distance new-distance)))))
   
-(defn get-index [matrix value]
+(defn get-index [matrix find]
   (first (for [[row-i row] (map-indexed vector matrix)
-               [col-i val] (map-indexed vector row)
-               :when (= val value)]
+               [col-i value] (map-indexed vector row)
+               :when (= value find)]
            [row-i col-i])))
+
 (comment
   (- (int \z) (int \a))
   (let [sample-input "Sabqponm\nabcryxxl\naccszExk\nacctuvwj\nabdefghi" 
