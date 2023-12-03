@@ -4,6 +4,7 @@
          uncomplicate/fluokitten             {:mvn/version "0.9.1"}
          clojure.java-time/clojure.java-time {:mvn/version "1.2.0"}
          funcool/promesa                     {:mvn/version "10.0.594"}
+         org.clojure/data.csv                {:mvn/version "1.0.1"}
          pez/taplet                          {#_#_:local/root "./taplet"
                                               :git/url "https://github.com/ljb7977/taplet"
                                               :git/sha "0e8007d6c43f7793c63c8845698351e533bee401"}

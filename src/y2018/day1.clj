@@ -3,7 +3,6 @@
 
 (def input-val (util/read-lines "y2018/day1.txt"))
 
-
 ; -------- Part 1 ----------
 (comment
   (->> input-val
@@ -27,9 +26,6 @@
        (map parse-long)
        cycle
        iter))
-
-
-
 
 ; version 2: using reduce
 ; loop-recur == reduce
