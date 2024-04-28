@@ -1,1 +1,0 @@
-(ns edu-manual.main)
