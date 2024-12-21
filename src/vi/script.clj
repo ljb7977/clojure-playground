@@ -4,7 +4,7 @@
             [jsonista.core :as j]))
   
 (comment
-  (let [input "남부대학교\n위덕대학교\n중앙승가대학교\n한신대학교\n수원대학교\n예원예술대학교\n전주대학교\n고신대학교\n금강대학교\n한라대학교\n대구공업대학교\n우송정보대학"]
+  (let [input "대구보건대학교\n동원과학기술대학교\n계명문화대학교\n청암대학교\n가톨릭상지대학교\n경북과학대학교"]
     #_(count (clojure.string/split-lines input))
     (->> (clojure.string/split-lines input)
          (map #(str "'" % "'"))
