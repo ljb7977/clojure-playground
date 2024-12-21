@@ -10,5 +10,5 @@
                                               :git/sha "0e8007d6c43f7793c63c8845698351e533bee401"}
          org.clojure/core.match              {:mvn/version "1.0.0"}
          hato/hato                           {:mvn/version "0.9.0"}
-         metosin/jsonista {:mvn/version "0.3.7"}}
+         metosin/jsonista                    {:mvn/version "0.3.7"}}
  :paths ["src" "resources"]}
